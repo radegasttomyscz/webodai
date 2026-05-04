@@ -481,7 +481,12 @@ export default function App() {
         }),
       });
       const data = await res.json();
-      let raw = data.content.map(b => b.text || "").join("");
+if (!data.content) {
+  alert("API chyba: " + JSON.stringify(data));
+  setLoading(false);
+  return;
+}
+let raw = data.content.map(b => b.text || "").join("");
       raw = raw.replace(/^```html?\s*/i,"").replace(/\s*```\s*$/i,"").trim();
       setHtml(raw);
       setGenCount(c => c + 1);
