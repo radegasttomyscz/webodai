@@ -480,13 +480,11 @@ export default function App() {
           messages: [{ role: "user", content: buildPrompt(f) }],
         }),
       });
-      const data = await res.json();
-if (!data.content) {
-  alert("API chyba: " + JSON.stringify(data));
-  setLoading(false);
-  return;
-}
-let raw = data.content.map(b => b.text || "").join("");
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch(ex) { alert("Odpoved neni JSON: " + text.slice(0,300)); setLoading(false); return; }
+      if (!data.content) { alert("API chyba: " + JSON.stringify(data).slice(0,400)); setLoading(false); return; }
+      let raw = data.content.map(b => b.text || "").join("");
       raw = raw.replace(/^```html?\s*/i,"").replace(/\s*```\s*$/i,"").trim();
       setHtml(raw);
       setGenCount(c => c + 1);
