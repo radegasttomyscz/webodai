@@ -253,6 +253,8 @@ function PreviewScreen({ html, name, genCount, onRegen, onBack }) {
     });
     a.click();
   };
+  if (loading)         return <LoadingScreen name={f.companyName} />;
+  if (preview && html) return <PreviewScreen html={html} name={f.companyName} genCount={genCount} onRegen={generate} onBack={() => setPreview(false)} />;
   return (
     <div style={{ background: C.bg, minHeight: "100vh", fontFamily: "inherit" }}>
       <div style={{ padding: "12px 20px", background: C.card, borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, position: "sticky", top: 0, zIndex: 100 }}>
