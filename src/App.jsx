@@ -315,45 +315,67 @@ export default function App() {
   };
 
   const generate = async () => {
-    if (genCount >= MAX_GENERATIONS) {
-      alert(`Limit ${MAX_GENERATIONS} generování byl vyčerpán. Pro nový web proveďte novou platbu.`);
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await fetch("/.netlify/functions/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ formData: f }),
-      });
-      const text = await res.text();
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        alert("Chyba serveru: " + text.slice(0, 200));
-        setLoading(false);
-        return;
-      }
-      if (!data.content) {
-        alert("API chyba: " + JSON.stringify(data).slice(0, 300));
-        setLoading(false);
-        return;
-      }
-      let raw = data.content.map(b => b.text || "").join("");
-      raw = raw.replace(/^```html?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
-      setHtml(raw);
-      setGenCount(c => c + 1);
-      setPreview(true);
-    } catch (e) {
-      alert("Chyba: " + e.message);
-    }
-    setLoading(false);
-  };
+  if (genCount >= MAX_GENERATIONS) {
+    alert(`Limit ${MAX_GENERATIONS} generování byl vyčerpán.`);
+    return;
+  }
+  setLoading(true);
+  try {
+    const keyRes = await fetch("/.netlify/functions/getkey");
+    const { key } = await keyRes.json();
 
-  if (loading)         return <LoadingScreen name={f.companyName} />;
-  if (preview && html) return <PreviewScreen html={html} name={f.companyName} genCount={genCount} onRegen={generate} onBack={() => setPreview(false)} />;
+    const services = f.services.filter(s => s.trim()).join(", ");
+    const gdpr = `Správce: ${f.companyName}, IČO: ${f.ico}, ${f.address} ${f.city}. Email: ${f.email}. Údaje zpracovávány za účelem odpovědi na poptávku dle čl. 6/1/f GDPR.`;
+    const prompt = `Vytvoř kompletní ONE-PAGE HTML web. Vrať POUZE HTML začínající <!DOCTYPE html>, bez markdown.
 
+Firma: ${f.companyName} | IČO: ${f.ico} | Obor: ${f.industry} | Popis: ${f.description}
+Služby: ${services}
+Kontakt: ${f.phone} | ${f.email} | ${f.address} ${f.city}
+Primární barva: ${f.palette.primary} | Akcent: ${f.palette.accent} | Styl: ${f.style}
+
+Použij Google Font. CSS proměnné v :root. Mobile-first. Smooth scroll. Vše v jednom souboru.
+
+SEKCE (všechny povinné):
+1. nav - sticky, logo=název firmy, menu: #o-nas #sluzby #galerie #kontakt
+2. #home - hero min-height:100vh, gradient, H1=název, slogan, 2 tlačítka
+3. #o-nas - popis + 3 výhody s emoji v kartách
+4. #sluzby - grid karet: ${services}
+5. #galerie - 6 šedých placeholderů "📷 Přidejte foto"
+6. #kontakt - formulář action="mailto:${f.email}" method="post" enctype="text/plain", pole Jméno/Email/Zpráva, GDPR checkbox, tlačítko + kontaktní info vedle
+7. #gdpr - Zásady OÚ: ${gdpr}
+8. footer - © ${new Date().getFullYear()} ${f.companyName} | IČO: ${f.ico}
+
+VRAŤ POUZE HTML. Začni <!DOCTYPE html>.`;
+
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": key,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
+      },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 4000,
+        messages: [{ role: "user", content: prompt }],
+      }),
+    });
+
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { alert("Chyba: " + text.slice(0, 200)); setLoading(false); return; }
+    if (!data.content) { alert("API chyba: " + JSON.stringify(data).slice(0, 300)); setLoading(false); return; }
+    let raw = data.content.map(b => b.text || "").join("");
+    raw = raw.replace(/^```html?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
+    setHtml(raw);
+    setGenCount(c => c + 1);
+    setPreview(true);
+  } catch (e) {
+    alert("Chyba: " + e.message);
+  }
+  setLoading(false);
+};
   return (
     <div style={{ background: C.bg, minHeight: "100vh", color: C.text, fontFamily: "-apple-system,'Segoe UI',sans-serif", paddingBottom: 60 }}>
       <div style={{ padding: "22px 24px 18px", textAlign: "center", borderBottom: `1px solid ${C.border}`, marginBottom: 24 }}>
