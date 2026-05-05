@@ -22,67 +22,6 @@ const C = {
   muted: "#64748b", input: "#0a0a16", success: "#16a34a",
 };
 
-function buildPrompt(f) {
-  const services   = f.services.filter(s => s.trim());
-  const reviews    = f.reviews.filter(r => r.text.trim());
-  const hasReviews = reviews.length > 0;
-  const p          = f.palette;
-  const styleDesc  = {
-    modern: "moderní, čistý a minimalistický — hodně bílého prostoru, tenké linky, elegance",
-    warm:   "řemeslný a teplý — přátelský, důvěryhodný, osobní, jako od souseda odborníka",
-    bold:   "odvážný a silný — velká typografie, výrazné kontrasty, rázný dojem",
-  };
-  const gdprText = f.gdprMode === "custom" && f.gdprCustom.trim()
-    ? f.gdprCustom.trim()
-    : `Správce osobních údajů: ${f.companyName}, IČO: ${f.ico}, ${f.address}${f.city ? ", " + f.city : ""}. Osobní údaje (jméno, email, telefon) jsou zpracovávány výhradně za účelem odpovědi na Vaši poptávku, na základě oprávněného zájmu správce dle čl. 6 odst. 1 písm. f) GDPR. Údaje nejsou předávány třetím stranám. Máte právo na přístup, opravu, výmaz a námitku. Kontakt: ${f.email}.`;
-  const secNum = n => hasReviews ? n : n - 1;
-
-  return `Jsi expert webdesignér. Vytvoř kompletní, profesionální, KRÁSNOU ONE-PAGE HTML webovou stránku.
-Vrať POUZE čistý HTML kód začínající <!DOCTYPE html>. Bez markdown, bez textu mimo HTML.
-
-=== FIRMA ===
-Název: ${f.companyName}
-IČO: ${f.ico}
-Obor: ${f.industry}
-Popis: ${f.description}
-${f.founded ? `Rok založení: ${f.founded}` : ""}
-
-=== SLUŽBY ===
-${services.map(s => `• ${s}`).join("\n")}
-
-=== KONTAKT ===
-Telefon: ${f.phone}
-Email: ${f.email}
-Adresa: ${f.address}${f.city ? ", " + f.city : ""}
-
-${hasReviews ? `=== RECENZE ===\n${reviews.map(r => `• ${r.stars}★ "${r.text}" — ${r.name}`).join("\n")}` : ""}
-
-=== DESIGN ===
-Styl: ${styleDesc[f.style]}
-Primární barva: ${p.primary} | Akcentová: ${p.accent} | Pozadí: ${p.bg}
-
-=== STRUKTURA WEBU (POVINNÁ) ===
-1. NAVIGACE — sticky, průhledná → solid při scrollu. Menu: Domů | O nás | Služby | Galerie${hasReviews ? " | Recenze" : ""} | Kontakt. Hamburger menu na mobilech.
-2. HERO — min-height:100vh, výrazný CSS gradient. H1 = název firmy, kreativní slogan pro "${f.industry}". 2 buttony: "Kontaktujte nás" (#kontakt) | "Naše služby" (#sluzby)
-3. O NÁS — id="o-nas", popis firmy + 3 výhody s emoji v kartách
-4. NAŠE SLUŽBY — id="sluzby", grid karet: emoji + název + 2 věty popis. Služby: ${services.join(", ")}
-5. GALERIE — id="galerie", 6 CSS placeholderů "📷 Přidejte foto", hover efekt
-${hasReviews ? `6. RECENZE — id="recenze", karty s hvězdičkami ★ a jménem zákazníka` : ""}
-${secNum(7)}. KONTAKT — id="kontakt", 2 sloupce: formulář + info
-   <form action="mailto:${f.email}" method="post" enctype="text/plain">
-   Pole: Jméno, Email, Telefon (nepovinný), Zpráva
-   Pod Zprávou: <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;margin-top:12px"><input type="checkbox" name="gdpr" required style="margin-top:3px;flex-shrink:0"><span>Souhlasím se <a href="#gdpr">zpracováním osobních údajů</a>.</span></label>
-   Tlačítko: "Odeslat zprávu". Info: 📞 ${f.phone} | ✉️ ${f.email} | 📍 ${f.address}${f.city ? ", " + f.city : ""} | IČO: ${f.ico}
-${secNum(8)}. GDPR — id="gdpr", šedá sekce, H2 "Zásady ochrany osobních údajů". Text: ${gdprText}
-${secNum(9)}. FOOTER — © ${new Date().getFullYear()} ${f.companyName} | IČO: ${f.ico} | <a href="#gdpr">Ochrana osobních údajů</a>
-
-=== TECHNICKÉ POŽADAVKY ===
-- Google Fonts, vše v jednom souboru, mobile-first, scroll-behavior:smooth
-- Intersection Observer fade-in, CSS :root proměnné, hover efekty
-
-VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
-}
-
 const inp = { width: "100%", padding: "12px 16px", background: C.input, border: `1px solid ${C.border}`, borderRadius: 10, color: C.text, fontSize: 15, outline: "none", boxSizing: "border-box", fontFamily: "inherit" };
 const lbl = { display: "block", fontSize: 12, fontWeight: 600, color: C.muted, marginBottom: 8, letterSpacing: "0.08em", textTransform: "uppercase" };
 const btnA = { background: C.accent, border: "none", color: "white", padding: "13px 26px", borderRadius: 10, cursor: "pointer", fontSize: 15, fontWeight: 700, fontFamily: "inherit" };
@@ -299,7 +238,7 @@ function LoadingScreen({ name }) {
             </div>
           ))}
         </div>
-        <p style={{ color: C.muted, fontSize: 13, marginTop: 24 }}>Obvykle trvá 20–40 sekund</p>
+        <p style={{ color: C.muted, fontSize: 13, marginTop: 24 }}>Obvykle trvá 5–10 sekund</p>
       </div>
     </div>
   );
@@ -385,11 +324,7 @@ export default function App() {
       const res = await fetch("/.netlify/functions/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 4000,
-          messages: [{ role: "user", content: buildPrompt(f) }],
-        }),
+        body: JSON.stringify({ formData: f }),
       });
       const text = await res.text();
       let data;
@@ -406,7 +341,7 @@ export default function App() {
         return;
       }
       let raw = data.content.map(b => b.text || "").join("");
-      raw = raw.replace(/^```html?\s*/i,"").replace(/\s*```\s*$/i,"").trim();
+      raw = raw.replace(/^```html?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
       setHtml(raw);
       setGenCount(c => c + 1);
       setPreview(true);
