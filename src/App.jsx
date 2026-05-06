@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 
-const SIMPLESHOP_URL = "https://www.simpleshop.cz/vas-produkt/";
 const MAX_GENERATIONS = 3;
-
 const PALETTES = [
   { id: "blue",   name: "Modrá",    primary: "#1e3a8a", accent: "#3b82f6", bg: "#eff6ff", label: "Důvěra" },
   { id: "green",  name: "Zelená",   primary: "#14532d", accent: "#16a34a", bg: "#f0fdf4", label: "Příroda" },
@@ -21,7 +19,6 @@ const C = {
   border: "#1e1e30", accent: "#f97316", text: "#e2e8f0",
   muted: "#64748b", input: "#0a0a16", success: "#16a34a",
 };
-
 const inp = { width: "100%", padding: "12px 16px", background: C.input, border: `1px solid ${C.border}`, borderRadius: 10, color: C.text, fontSize: 15, outline: "none", boxSizing: "border-box", fontFamily: "inherit" };
 const lbl = { display: "block", fontSize: 12, fontWeight: 600, color: C.muted, marginBottom: 8, letterSpacing: "0.08em", textTransform: "uppercase" };
 const btnA = { background: C.accent, border: "none", color: "white", padding: "13px 26px", borderRadius: 10, cursor: "pointer", fontSize: 15, fontWeight: 700, fontFamily: "inherit" };
@@ -238,7 +235,7 @@ function LoadingScreen({ name }) {
             </div>
           ))}
         </div>
-        <p style={{ color: C.muted, fontSize: 13, marginTop: 24 }}>Obvykle trvá 5–10 sekund</p>
+        <p style={{ color: C.muted, fontSize: 13, marginTop: 24 }}>Obvykle trvá 20–40 sekund</p>
       </div>
     </div>
   );
@@ -253,8 +250,6 @@ function PreviewScreen({ html, name, genCount, onRegen, onBack }) {
     });
     a.click();
   };
-  if (loading)         return <LoadingScreen name={f.companyName} />;
-  if (preview && html) return <PreviewScreen html={html} name={f.companyName} genCount={genCount} onRegen={generate} onBack={() => setPreview(false)} />;
   return (
     <div style={{ background: C.bg, minHeight: "100vh", fontFamily: "inherit" }}>
       <div style={{ padding: "12px 20px", background: C.card, borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, position: "sticky", top: 0, zIndex: 100 }}>
@@ -317,17 +312,16 @@ export default function App() {
   };
 
   const generate = async () => {
-  if (genCount >= MAX_GENERATIONS) {
-    alert(`Limit ${MAX_GENERATIONS} generování byl vyčerpán.`);
-    return;
-  }
-  setLoading(true);
-  try {
-const key = import.meta.env.VITE_ANTHROPIC_KEY;
-
-    const services = f.services.filter(s => s.trim()).join(", ");
-    const gdpr = `Správce: ${f.companyName}, IČO: ${f.ico}, ${f.address} ${f.city}. Email: ${f.email}. Údaje zpracovávány za účelem odpovědi na poptávku dle čl. 6/1/f GDPR.`;
-    const prompt = `Vytvoř kompletní ONE-PAGE HTML web. Vrať POUZE HTML začínající <!DOCTYPE html>, bez markdown.
+    if (genCount >= MAX_GENERATIONS) {
+      alert(`Limit ${MAX_GENERATIONS} generování byl vyčerpán.`);
+      return;
+    }
+    setLoading(true);
+    try {
+      const key = import.meta.env.VITE_ANTHROPIC_KEY;
+      const services = f.services.filter(s => s.trim()).join(", ");
+      const gdpr = `Správce: ${f.companyName}, IČO: ${f.ico}, ${f.address} ${f.city}. Email: ${f.email}. Údaje zpracovávány za účelem odpovědi na poptávku dle čl. 6/1/f GDPR.`;
+      const prompt = `Vytvoř kompletní ONE-PAGE HTML web. Vrať POUZE HTML začínající <!DOCTYPE html>, bez markdown.
 
 Firma: ${f.companyName} | IČO: ${f.ico} | Obor: ${f.industry} | Popis: ${f.description}
 Služby: ${services}
@@ -348,35 +342,39 @@ SEKCE (všechny povinné):
 
 VRAŤ POUZE HTML. Začni <!DOCTYPE html>.`;
 
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": key,
-        "anthropic-version": "2023-06-01",
-        "anthropic-dangerous-direct-browser-access": "true",
-      },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 4000,
-        messages: [{ role: "user", content: prompt }],
-      }),
-    });
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": key,
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true",
+        },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 4000,
+          messages: [{ role: "user", content: prompt }],
+        }),
+      });
 
-    const text = await res.text();
-    let data;
-    try { data = JSON.parse(text); } catch { alert("Chyba: " + text.slice(0, 200)); setLoading(false); return; }
-    if (!data.content) { alert("API chyba: " + JSON.stringify(data).slice(0, 300)); setLoading(false); return; }
-    let raw = data.content.map(b => b.text || "").join("");
-    raw = raw.replace(/^```html?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
-    setHtml(raw);
-    setGenCount(c => c + 1);
-    setPreview(true);
-  } catch (e) {
-    alert("Chyba: " + e.message);
-  }
-  setLoading(false);
-};
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { alert("Chyba: " + text.slice(0, 200)); setLoading(false); return; }
+      if (!data.content) { alert("API chyba: " + JSON.stringify(data).slice(0, 300)); setLoading(false); return; }
+      let raw = data.content.map(b => b.text || "").join("");
+      raw = raw.replace(/^```html?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
+      setHtml(raw);
+      setGenCount(c => c + 1);
+      setPreview(true);
+    } catch (e) {
+      alert("Chyba: " + e.message);
+    }
+    setLoading(false);
+  };
+
+  if (loading)         return <LoadingScreen name={f.companyName} />;
+  if (preview && html) return <PreviewScreen html={html} name={f.companyName} genCount={genCount} onRegen={generate} onBack={() => setPreview(false)} />;
+
   return (
     <div style={{ background: C.bg, minHeight: "100vh", color: C.text, fontFamily: "-apple-system,'Segoe UI',sans-serif", paddingBottom: 60 }}>
       <div style={{ padding: "22px 24px 18px", textAlign: "center", borderBottom: `1px solid ${C.border}`, marginBottom: 24 }}>
