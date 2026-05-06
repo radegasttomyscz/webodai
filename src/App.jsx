@@ -318,7 +318,8 @@ export default function App() {
     }
     setLoading(true);
     try {
-      const key = import.meta.env.VITE_ANTHROPIC_KEY;
+const key = import.meta.env.VITE_ANTHROPIC_KEY;
+alert("Klíč začíná: " + (key ? key.slice(0,10) : "UNDEFINED"));
       const services = f.services.filter(s => s.trim()).join(", ");
       const gdpr = `Správce: ${f.companyName}, IČO: ${f.ico}, ${f.address} ${f.city}. Email: ${f.email}. Údaje zpracovávány za účelem odpovědi na poptávku dle čl. 6/1/f GDPR.`;
       const prompt = `Vytvoř kompletní ONE-PAGE HTML web. Vrať POUZE HTML začínající <!DOCTYPE html>, bez markdown.
