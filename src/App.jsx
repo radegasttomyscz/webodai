@@ -323,8 +323,7 @@ export default function App() {
   }
   setLoading(true);
   try {
-    const keyRes = await fetch("/.netlify/functions/getkey");
-    const { key } = await keyRes.json();
+const key = import.meta.env.VITE_ANTHROPIC_KEY;
 
     const services = f.services.filter(s => s.trim()).join(", ");
     const gdpr = `Správce: ${f.companyName}, IČO: ${f.ico}, ${f.address} ${f.city}. Email: ${f.email}. Údaje zpracovávány za účelem odpovědi na poptávku dle čl. 6/1/f GDPR.`;
