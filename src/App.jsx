@@ -342,7 +342,7 @@ SEKCE (všechny povinné):
 
 VRAŤ POUZE HTML. Začni <!DOCTYPE html>.`;
 
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+const res = await fetch("https://webodaii.tomyscz1.workers.dev", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
