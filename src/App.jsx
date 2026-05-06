@@ -346,9 +346,7 @@ const res = await fetch("https://webodaii.tomyscz1.workers.dev", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": key,
           "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true",
         },
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001",
