@@ -786,7 +786,7 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
         },
         body: JSON.stringify({
           model: "claude-sonnet-4-6",
-          max_tokens: 16000,
+          max_tokens: 20000,
           messages: [{ role: "user", content: prompt }],
         }),
       });
