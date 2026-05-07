@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 
 const MAX_GENERATIONS = 3;
 const PALETTES = [
-  { id: "blue",   name: "Modrá",    primary: "#1e3a8a", accent: "#3b82f6", bg: "#eff6ff", label: "Důvěra" },
-  { id: "green",  name: "Zelená",   primary: "#14532d", accent: "#16a34a", bg: "#f0fdf4", label: "Příroda" },
-  { id: "orange", name: "Oranžová", primary: "#9a3412", accent: "#f97316", bg: "#fff7ed", label: "Energie" },
-  { id: "slate",  name: "Tmavá",    primary: "#0f172a", accent: "#7c3aed", bg: "#f1f5f9", label: "Prémiová" },
-  { id: "red",    name: "Červená",  primary: "#7f1d1d", accent: "#dc2626", bg: "#fef2f2", label: "Síla" },
+  { id: "mustard", name: "Hořčicová", primary: "#c9963d", accent: "#d4a850", bg: "#faf7f2", label: "Řemeslná" },
+  { id: "navy",    name: "Námořnická", primary: "#1e3a8a", accent: "#3b82f6", bg: "#f0f6ff", label: "Důvěryhodná" },
+  { id: "forest",  name: "Lesní",     primary: "#15803d", accent: "#16a34a", bg: "#f0fdf4", label: "Přírodní" },
+  { id: "salmon",  name: "Lososová",  primary: "#c2410c", accent: "#f97316", bg: "#fff7ed", label: "Energická" },
+  { id: "burgundy",name: "Vínová",    primary: "#7f1d1d", accent: "#b91c1c", bg: "#fef2f2", label: "Prémiová" },
 ];
 const STYLES = [
   { id: "modern", emoji: "✦", label: "Moderní",   desc: "Čistý a minimalistický" },
@@ -37,7 +37,7 @@ function StepFirma({ f, upd }) {
           <div style={{ fontSize: 12, color: C.muted, marginTop: 6 }}>Povinný údaj — zobrazí se ve footeru a v GDPR sekci webu</div>
         </div>
         <div><label style={lbl}>Obor podnikání *</label><input style={inp} placeholder="např. Truhlářství, Instalatérství..." value={f.industry} onChange={e => upd("industry", e.target.value)} /></div>
-        <div><label style={lbl}>Popis firmy *</label><textarea style={{ ...inp, height: 100, resize: "vertical" }} placeholder="Pár vět o vaší firmě..." value={f.description} onChange={e => upd("description", e.target.value)} /></div>
+        <div><label style={lbl}>Popis firmy *</label><textarea style={{ ...inp, height: 100, resize: "vertical" }} placeholder="Pár vět o vaší firmě — co děláte, kde působíte, čím se odlišujete..." value={f.description} onChange={e => upd("description", e.target.value)} /></div>
         <div><label style={lbl}>Rok založení (volitelné)</label><input style={inp} placeholder="např. 2005" value={f.founded} onChange={e => upd("founded", e.target.value)} /></div>
       </div>
     </div>
@@ -235,7 +235,7 @@ function LoadingScreen({ name }) {
             </div>
           ))}
         </div>
-        <p style={{ color: C.muted, fontSize: 13, marginTop: 24 }}>Obvykle trvá 20–40 sekund</p>
+        <p style={{ color: C.muted, fontSize: 13, marginTop: 24 }}>Trvá 30–60 sekund — prosím buďte trpělivý</p>
       </div>
     </div>
   );
@@ -318,39 +318,182 @@ export default function App() {
     }
     setLoading(true);
     try {
-const key = import.meta.env.VITE_ANTHROPIC_KEY;
-      const services = f.services.filter(s => s.trim()).join(", ");
-      const gdpr = `Správce: ${f.companyName}, IČO: ${f.ico}, ${f.address} ${f.city}. Email: ${f.email}. Údaje zpracovávány za účelem odpovědi na poptávku dle čl. 6/1/f GDPR.`;
-      const prompt = `Vytvoř kompletní ONE-PAGE HTML web. Vrať POUZE HTML začínající <!DOCTYPE html>, bez markdown.
+      const services = f.services.filter(s => s.trim());
+      const reviews = f.reviews.filter(r => r.text.trim());
+      const gdpr = f.gdprMode === "custom" && f.gdprCustom.trim()
+        ? f.gdprCustom.trim()
+        : `Správce osobních údajů: ${f.companyName}, IČO: ${f.ico}, ${f.address} ${f.city}. Osobní údaje (jméno, email, telefon) jsou zpracovávány výhradně za účelem odpovědi na Vaši poptávku, na základě oprávněného zájmu správce dle čl. 6 odst. 1 písm. f) GDPR. Údaje nejsou předávány třetím stranám. Kontakt: ${f.email}.`;
 
-Firma: ${f.companyName} | IČO: ${f.ico} | Obor: ${f.industry} | Popis: ${f.description}
-Služby: ${services}
-Kontakt: ${f.phone} | ${f.email} | ${f.address} ${f.city}
-Primární barva: ${f.palette.primary} | Akcent: ${f.palette.accent} | Styl: ${f.style}
+      const prompt = `Jsi prémiový český webdesignér. Tvým úkolem je vytvořit profesionální one-page web pro malou českou firmu, který vypadá jako práce dražší agentury (cena 30-80 tisíc Kč). Zákazník nesmí poznat, že web vznikl rychle pomocí AI.
 
-Použij Google Font. CSS proměnné v :root. Mobile-first. Smooth scroll. Vše v jednom souboru.
+VRAŤ POUZE čistý HTML kód začínající <!DOCTYPE html>. Bez markdown, bez komentářů mimo HTML, bez textu před nebo za HTML.
 
-SEKCE (všechny povinné):
-1. nav - sticky, logo=název firmy, menu: #o-nas #sluzby #galerie #kontakt
-2. #home - hero min-height:100vh, gradient, H1=název, slogan, 2 tlačítka
-3. #o-nas - popis + 3 výhody s emoji v kartách
-4. #sluzby - grid karet: ${services}
-5. #galerie - 6 šedých placeholderů "📷 Přidejte foto"
-6. #kontakt - formulář action="mailto:${f.email}" method="post" enctype="text/plain", pole Jméno/Email/Zpráva, GDPR checkbox, tlačítko + kontaktní info vedle
-7. #gdpr - Zásady OÚ: ${gdpr}
-8. footer - © ${new Date().getFullYear()} ${f.companyName} | IČO: ${f.ico}
+═══ ÚDAJE O FIRMĚ ═══
+Název: ${f.companyName}
+IČO: ${f.ico}
+Obor: ${f.industry}
+Popis od majitele: ${f.description}
+${f.founded ? `Působí od: ${f.founded}` : ""}
+Služby: ${services.join(" · ")}
+Telefon: ${f.phone}
+Email: ${f.email}
+Adresa: ${f.address}, ${f.city}
+${reviews.length ? `Recenze:\n${reviews.map(r => `- ${r.stars}★ "${r.text}" — ${r.name}`).join("\n")}` : ""}
+Primární barva: ${f.palette.primary}
+Akcentová barva: ${f.palette.accent}
+Pozadí krémové/světlé: ${f.palette.bg}
 
-VRAŤ POUZE HTML. Začni <!DOCTYPE html>.`;
+═══ DESIGN FILOZOFIE — DODRŽ STRIKTNĚ ═══
 
-const res = await fetch("https://webodaii.tomyscz1.workers.dev", {
+VIZUÁLNÍ JAZYK
+- Hodně bílého prostoru, sekce dýchají (padding 80-120px vertical na desktopu)
+- Velká, výrazná typografie: H1 dosahuje 56-72px, H2 36-44px, H3 22-28px na desktopu
+- Letter-spacing -0.02em pro velké nadpisy, line-height 1.1-1.2
+- Tělo textu 16-18px, line-height 1.65
+- Cards: jemný stín box-shadow: 0 4px 24px rgba(0,0,0,0.06), border-radius 16px
+- Buttons: border-radius 10px, padding 14px 28px, font-weight 600
+- Smooth transitions 0.3s ease všude
+- Hover na kartách: translateY(-4px) + prohloubený stín
+
+TYPOGRAFIE — Google Fonts
+- Nadpisy: "Plus Jakarta Sans" weight 700-800
+- Tělo: "Inter" weight 400-500
+- Importuj jednou v <head>
+
+BAREVNÉ POUŽITÍ
+- Většina sekcí: krémové/světlé pozadí (${f.palette.bg})
+- Některé sekce: čistá bílá pro kontrast
+- Akcent (${f.palette.primary}): pouze pro CTA, hover, ikony v kruzích, decorative prvky — NIKDY ne jako celé pozadí velkých sekcí
+- Text: tmavá #1a1a1a, sekundární text: #6b6b6b
+- Footer: tmavé pozadí #0f0f0f s bílým textem
+
+═══ POVINNÁ STRUKTURA ═══
+
+NAVIGACE
+- Sticky top, na začátku průhledná, při scrollu solid white s subtle shadow
+- Logo vlevo (název firmy v Plus Jakarta Sans, weight 800)
+- Menu vpravo: Domů · O nás · Služby · Jak to probíhá · Galerie${reviews.length ? " · Recenze" : ""} · Kontakt
+- Vpravo malé CTA "Poptávka" (#kontakt)
+- Mobile: hamburger animovaný do plnoobrazovkového menu
+
+HERO (id="home", min-height: 92vh)
+- Layout 2 sloupce na desktopu (60% text vlevo, 40% vizuál vpravo)
+- Levý sloupec:
+  • Malý kicker text nahoře (uppercase, primární barva, 13px, letter-spacing 0.1em) — vymysli krátký pro obor "${f.industry}"
+  • H1 = ZAJÍMAVÝ HEADLINE (NE jen název firmy!) — vymysli silnou benefit větu pro obor (např. truhlář: "Nábytek, který přežije generace", instalatér: "Voda v domě bez starostí, 24/7")
+  • Podtitulek 18-20px, 2 řádky max — řeší co firma dělá pro zákazníka
+  • 2 buttony: primární "Nezávazná poptávka" (#kontakt), sekundární outline "Naše služby" (#sluzby)
+  • Pod buttony 3 trust elementy v řadě: "✓ Více než X let zkušeností  ✓ Stovky spokojených klientů  ✓ Garance kvality" (vymysli relevantní pro obor a roky)
+- Pravý sloupec: dekorativní vizuální prvek
+  • CSS pattern: kombinace gradientu (${f.palette.primary} → ${f.palette.accent}) s několika geometrickými tvary (kruhy, kosočtverce) v různých průhlednostech, působí jako moderní art piece
+  • Border-radius 24px, výška 500-600px
+
+SEKCE PROČ MY (id="o-nas")
+- Bílé pozadí, padding 100px 0
+- H2 vlevo nahoře "Proč si vybrat ${f.companyName.split(" ")[0]}" + krátký podnadpis
+- 3 sloupce s benefity v kartách:
+  • Velká emoji ikona v kruhu (60x60px, ${f.palette.primary} s 15% průhlednosti jako pozadí)
+  • Nadpis benefitu (22px, weight 700)
+  • 2-3 věty popisu (16px, line-height 1.6, šedý text)
+- Vymysli 3 SPECIFICKÉ benefity pro "${f.industry}" — NE obecné "kvalita, rychlost, cena". Buď konkrétní.
+
+SLUŽBY (id="sluzby")
+- Pozadí ${f.palette.bg}, padding 100px 0
+- H2 "Co pro vás děláme" + podnadpis o tom, co všechno řeší
+- Grid karet (3 sloupce na desktop, 2 na tablet, 1 na mobil)
+- Karta: bílé pozadí, padding 32px, border-radius 16px
+  • Velká emoji ikona vlevo nahoře
+  • Nadpis služby (20px weight 700)
+  • 2-3 věty popisu — vymysli pro každou službu konkrétní hodnotu
+  • Šipka → vpravo dole (decorative, ${f.palette.primary})
+- Hover: translateY(-6px), prohloubený stín
+- Služby: ${services.join(", ")}
+
+JAK TO PROBÍHÁ (id="proces")
+- Bílé pozadí, padding 100px 0
+- H2 "Jak u nás probíhá spolupráce" + podnadpis
+- 4 horizontální kroky (na mobilu vertikálně), spojené tenkou linkou
+- Krok: velké číslo v kruhu (1,2,3,4) v ${f.palette.primary}, nadpis kroku, krátký popis
+- Vymysli 4 logické kroky pro obor (např. "Poptávka → Konzultace → Realizace → Předání"). Vymysli vhodné nadpisy pro tento obor.
+
+GALERIE (id="galerie")
+- Pozadí ${f.palette.bg}, padding 100px 0
+- H2 "Naše práce" + podnadpis
+- Mřížka 3x2 (6 dlaždic), aspect-ratio 4:3, gap 16px
+- Dlaždice: linear-gradient ze 2 šedých odstínů + střední emoji "📷" + text "Vaše práce"
+- Hover: scale(1.03) + překryvný overlay v ${f.palette.primary} s 20% průhlednosti
+
+${reviews.length ? `RECENZE (id="recenze")
+- Bílé pozadí, padding 100px 0
+- H2 "Co o nás říkají zákazníci" + podnadpis
+- Grid 2-3 karet
+- Karta: padding 32px, border 1px solid #eee, border-radius 16px
+  • Hvězdičky nahoře (★ v ${f.palette.primary})
+  • Citát v uvozovkách, font-size 18px, italic
+  • Jméno zákazníka tučně dole
+` : ""}
+KONTAKT (id="kontakt")
+- Pozadí ${f.palette.primary} (text bílý), padding 100px 0
+- 2 sloupce na desktopu
+- Levý sloupec:
+  • Kicker "Pojďme to probrat" (uppercase, opacity 0.7)
+  • H2 "Kontaktujte nás" v bílé
+  • Podtitulek 2 řádky
+  • 4 řádky info v stylových řádcích s ikonami:
+    📞 ${f.phone}
+    ✉️ ${f.email}
+    📍 ${f.address}, ${f.city}
+    🕐 Po-Pá: 8:00-17:00
+- Pravý sloupec — formulář v BÍLÉ kartě:
+  • padding 40px, border-radius 20px
+  • Pole: Vaše jméno, Email, Telefon (volitelné), Předmět, Vaše zpráva (textarea 4 řádky)
+  • Inputs: padding 14px, border 1px solid #e5e5e5, border-radius 10px, font-size 16px
+  • Pod polem zpráva GDPR checkbox: <label style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#666;margin-top:8px"><input type="checkbox" name="gdpr" required style="margin-top:3px"><span>Souhlasím se <a href="#gdpr" style="color:${f.palette.primary}">zpracováním osobních údajů</a>.</span></label>
+  • Submit button v ${f.palette.primary}, full-width, padding 16px, font-size 17px, weight 700
+  • Form: <form action="mailto:${f.email}" method="post" enctype="text/plain">
+
+GDPR (id="gdpr")
+- Bílé pozadí, padding 80px 0
+- Max-width 800px, centered
+- H2 "Zásady ochrany osobních údajů" (menší, 28px)
+- Text v 16px line-height 1.7: ${gdpr}
+
+FOOTER
+- Tmavé pozadí #0f0f0f, text bílý, padding 60px 0 30px
+- 3 sloupce: 
+  • Sloupec 1: logo (název firmy weight 800), pod ním krátký claim
+  • Sloupec 2: "Kontakt" + 4 řádky
+  • Sloupec 3: "Navigace" + odkazy na sekce
+- Spodní řádek: border-top, padding-top 30px, flex space-between
+  • Vlevo: © ${new Date().getFullYear()} ${f.companyName} | IČO: ${f.ico}
+  • Vpravo: <a href="#gdpr">Ochrana osobních údajů</a>
+
+═══ TECHNICKÉ POŽADAVKY ═══
+- Mobile-first responzivní s breakpointy 640, 768, 1024px
+- CSS proměnné v :root pro všechny barvy a fonty
+- scroll-behavior: smooth
+- Intersection Observer pro fade-in sekcí (opacity 0→1, translateY 30px→0, duration 0.6s)
+- Vše v jednom HTML souboru, žádné externí knihovny
+- Sémantické HTML5 (header, nav, main, section, footer)
+- Focus states na všech interaktivních prvcích (outline 2px solid ${f.palette.primary})
+
+═══ TÓN COPY ═══
+- Profesionální ale srdečný, ne korporátní
+- Krátké věty, žádné fráze typu "kvalita, profesionalita, spolehlivost"
+- Konkrétní hmatatelné výhody, ne obecné claims
+- Skutečně přemýšlej co majitel firmy "${f.companyName}" v oboru "${f.industry}" dělá pro zákazníka
+
+VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
+
+      const res = await fetch("https://webodaii.tomyscz1.workers.dev", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "anthropic-version": "2023-06-01",
         },
         body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 4000,
+          model: "claude-sonnet-4-6",
+          max_tokens: 8000,
           messages: [{ role: "user", content: prompt }],
         }),
       });
