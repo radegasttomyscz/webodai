@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const MAX_GENERATIONS = 3;
 const PALETTES = [
@@ -7,8 +7,9 @@ const PALETTES = [
   { id: "green",    name: "Zelená",   primary: "#15803d", accent: "#16a34a", bg: "#f0fdf4" },
   { id: "dark",     name: "Tmavá",    primary: "#0f172a", accent: "#475569", bg: "#f8fafc" },
   { id: "burgundy", name: "Vínová",   primary: "#7f1d1d", accent: "#b91c1c", bg: "#fef2f2" },
+  { id: "white",    name: "Bílá",     primary: "#18181b", accent: "#52525b", bg: "#ffffff" },
 ];
-const STEPS = ["Firma", "Služby", "Kontakt", "Recenze", "Barvy", "Shrnutí"];
+const STEPS = ["Firma", "Služby", "Fotky", "Kontakt", "Recenze", "Barvy", "Shrnutí"];
 const C = {
   bg: "#080810", card: "#0f0f1a", card2: "#13131f",
   border: "#1e1e30", accent: "#f97316", text: "#e2e8f0",
@@ -18,6 +19,34 @@ const inp = { width: "100%", padding: "12px 16px", background: C.input, border: 
 const lbl = { display: "block", fontSize: 12, fontWeight: 600, color: C.muted, marginBottom: 8, letterSpacing: "0.08em", textTransform: "uppercase" };
 const btnA = { background: C.accent, border: "none", color: "white", padding: "13px 26px", borderRadius: 10, cursor: "pointer", fontSize: 15, fontWeight: 700, fontFamily: "inherit" };
 const btnB = { background: C.card2, border: `1px solid ${C.border}`, color: C.text, padding: "13px 22px", borderRadius: 10, cursor: "pointer", fontSize: 15, fontFamily: "inherit" };
+
+// Komprese obrázků - zmenší a převede na base64
+async function compressImage(file, maxWidth = 1600, quality = 0.85, format = "jpeg") {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let { width, height } = img;
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        const mime = format === "png" ? "image/png" : "image/jpeg";
+        resolve(canvas.toDataURL(mime, quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 function StepFirma({ f, upd }) {
   return (
@@ -59,6 +88,170 @@ function StepSluzby({ f, upd }) {
           </div>
         ))}
         <button onClick={add} style={{ border: `1px dashed ${C.border}`, background: "none", color: C.muted, borderRadius: 10, padding: 12, cursor: "pointer", fontSize: 14 }}>+ Přidat službu</button>
+      </div>
+    </div>
+  );
+}
+
+function StepFotky({ f, upd }) {
+  const [busy, setBusy] = useState(null);
+  const heroRef = useRef(null);
+  const logoRef = useRef(null);
+  const galleryRefs = useRef([]);
+
+  const onHero = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setBusy("hero");
+    try { upd("heroImage", await compressImage(file, 1600, 0.85)); }
+    catch { alert("Chyba při zpracování obrázku."); }
+    setBusy(null);
+    e.target.value = "";
+  };
+
+  const onLogo = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setBusy("logo");
+    try { upd("logo", await compressImage(file, 400, 1.0, "png")); }
+    catch { alert("Chyba při zpracování loga."); }
+    setBusy(null);
+    e.target.value = "";
+  };
+
+  const onGallery = async (e, idx) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setBusy(`gallery-${idx}`);
+    try {
+      const data = await compressImage(file, 1200, 0.82);
+      const arr = [...f.gallery];
+      arr[idx] = data;
+      upd("gallery", arr);
+    } catch { alert("Chyba při zpracování obrázku."); }
+    setBusy(null);
+    e.target.value = "";
+  };
+
+  const removeGallery = (idx) => {
+    const arr = [...f.gallery];
+    arr[idx] = null;
+    upd("gallery", arr);
+  };
+
+  const Slot = ({ src, onClick, onRemove, busy: isBusy, label, icon, big }) => (
+    <div onClick={!isBusy && !src ? onClick : undefined} style={{
+      position: "relative",
+      border: `2px dashed ${src ? "transparent" : C.border}`,
+      borderRadius: 12,
+      background: src ? "transparent" : C.input,
+      aspectRatio: big ? "16/9" : "4/3",
+      cursor: !src && !isBusy ? "pointer" : "default",
+      overflow: "hidden",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      transition: "border-color 0.2s",
+    }}>
+      {src ? (
+        <>
+          <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <button onClick={(e) => { e.stopPropagation(); onRemove(); }} style={{
+            position: "absolute", top: 6, right: 6, width: 28, height: 28,
+            borderRadius: "50%", border: "none", background: "rgba(0,0,0,0.7)",
+            color: "white", cursor: "pointer", fontSize: 16, display: "flex",
+            alignItems: "center", justifyContent: "center", padding: 0,
+          }}>×</button>
+        </>
+      ) : isBusy ? (
+        <div style={{ color: C.muted, fontSize: 13 }}>Zpracovávám...</div>
+      ) : (
+        <div style={{ textAlign: "center", color: C.muted, fontSize: 13, padding: 8 }}>
+          <div style={{ fontSize: 24, marginBottom: 6 }}>{icon}</div>
+          <div>{label}</div>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div>
+      <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 700, color: C.text }}>Fotografie</h2>
+      <p style={{ color: C.muted, fontSize: 14, margin: "0 0 24px" }}>Vlastní fotky výrazně zvýší kvalitu webu — vše je volitelné</p>
+
+      <div style={{ marginBottom: 26 }}>
+        <label style={lbl}>Hero fotka (úvodní)</label>
+        <input ref={heroRef} type="file" accept="image/*" onChange={onHero} style={{ display: "none" }} />
+        <Slot
+          src={f.heroImage}
+          onClick={() => heroRef.current?.click()}
+          onRemove={() => upd("heroImage", null)}
+          busy={busy === "hero"}
+          label="Klikněte pro nahrání hero fotky"
+          icon="🖼"
+          big
+        />
+        <div style={{ fontSize: 12, color: C.muted, marginTop: 8 }}>Doporučujeme šířku alespoň 1200px. Bez fotky AI vytvoří grafický placeholder.</div>
+      </div>
+
+      <div style={{ marginBottom: 26 }}>
+        <label style={lbl}>Galerie (až 6 fotek)</label>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+          {[0,1,2,3,4,5].map(i => (
+            <div key={i}>
+              <input
+                ref={el => galleryRefs.current[i] = el}
+                type="file"
+                accept="image/*"
+                onChange={e => onGallery(e, i)}
+                style={{ display: "none" }}
+              />
+              <Slot
+                src={f.gallery[i]}
+                onClick={() => galleryRefs.current[i]?.click()}
+                onRemove={() => removeGallery(i)}
+                busy={busy === `gallery-${i}`}
+                label="Přidat"
+                icon="📷"
+              />
+            </div>
+          ))}
+        </div>
+        <div style={{ fontSize: 12, color: C.muted, marginTop: 8 }}>Prázdné dlaždice se nezobrazí — galerie se přizpůsobí počtu fotek.</div>
+      </div>
+
+      <div>
+        <label style={lbl}>Logo (volitelné)</label>
+        <input ref={logoRef} type="file" accept="image/*" onChange={onLogo} style={{ display: "none" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div onClick={!busy && !f.logo ? () => logoRef.current?.click() : undefined} style={{
+            width: 100, height: 100, flexShrink: 0,
+            border: `2px dashed ${f.logo ? "transparent" : C.border}`,
+            borderRadius: 12, background: f.logo ? C.input : C.input,
+            cursor: !f.logo && busy !== "logo" ? "pointer" : "default",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            overflow: "hidden", position: "relative",
+          }}>
+            {f.logo ? (
+              <>
+                <img src={f.logo} alt="" style={{ maxWidth: "85%", maxHeight: "85%", objectFit: "contain" }} />
+                <button onClick={() => upd("logo", null)} style={{
+                  position: "absolute", top: 4, right: 4, width: 22, height: 22,
+                  borderRadius: "50%", border: "none", background: "rgba(0,0,0,0.7)",
+                  color: "white", cursor: "pointer", fontSize: 14, padding: 0,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>×</button>
+              </>
+            ) : busy === "logo" ? (
+              <div style={{ color: C.muted, fontSize: 11 }}>...</div>
+            ) : (
+              <div style={{ textAlign: "center", color: C.muted, fontSize: 22 }}>🎨</div>
+            )}
+          </div>
+          <div style={{ fontSize: 13, color: C.muted, lineHeight: 1.5 }}>
+            {f.logo ? "Logo nahráno. Bude použito v navigaci a footeru." : "Bez loga použijeme stylový textový název firmy."}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -119,14 +312,14 @@ function StepBarvy({ f, upd }) {
     <div>
       <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 700, color: C.text }}>Barvy & GDPR</h2>
       <p style={{ color: C.muted, fontSize: 14, margin: "0 0 24px" }}>Vyberte barvu a nastavte ochranu osobních údajů</p>
-      
+
       <div style={{ marginBottom: 26 }}>
         <label style={lbl}>Barva webu</label>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 8 }}>
           {PALETTES.map(p => (
-            <div key={p.id} onClick={() => upd("palette", p)} style={{ border: `2px solid ${f.palette.id === p.id ? C.accent : C.border}`, borderRadius: 12, padding: "12px 6px", cursor: "pointer", textAlign: "center", background: f.palette.id === p.id ? C.accent + "18" : C.input }}>
-              <div style={{ width: 36, height: 36, borderRadius: "50%", background: p.primary, margin: "0 auto 8px", border: `3px solid ${p.accent}` }} />
-              <div style={{ fontSize: 12, fontWeight: 600, color: C.text }}>{p.name}</div>
+            <div key={p.id} onClick={() => upd("palette", p)} style={{ border: `2px solid ${f.palette.id === p.id ? C.accent : C.border}`, borderRadius: 12, padding: "12px 4px", cursor: "pointer", textAlign: "center", background: f.palette.id === p.id ? C.accent + "18" : C.input }}>
+              <div style={{ width: 32, height: 32, borderRadius: "50%", background: p.primary, margin: "0 auto 6px", border: `3px solid ${p.accent}` }} />
+              <div style={{ fontSize: 11, fontWeight: 600, color: C.text }}>{p.name}</div>
             </div>
           ))}
         </div>
@@ -161,6 +354,7 @@ function StepBarvy({ f, upd }) {
 function StepShrnutí({ f, onPay }) {
   const services = f.services.filter(s => s.trim());
   const reviews  = f.reviews.filter(r => r.text.trim());
+  const galleryCount = f.gallery.filter(Boolean).length;
   const Row = ({ label, val }) => val ? (
     <div style={{ display: "flex", gap: 12, padding: "8px 0", borderBottom: `1px solid ${C.border}` }}>
       <span style={{ color: C.muted, fontSize: 13, minWidth: 100 }}>{label}</span>
@@ -179,6 +373,9 @@ function StepShrnutí({ f, onPay }) {
         <Row label="Email"   val={f.email} />
         <Row label="Adresa"  val={[f.address, f.city].filter(Boolean).join(", ")} />
         <Row label="Služby"  val={services.join(", ")} />
+        <Row label="Hero"    val={f.heroImage ? "✓ Nahráno" : "—"} />
+        <Row label="Galerie" val={galleryCount > 0 ? `${galleryCount}× foto` : "—"} />
+        <Row label="Logo"    val={f.logo ? "✓ Nahráno" : "—"} />
         <Row label="Recenze" val={reviews.length ? `${reviews.length}×` : "žádné"} />
         <Row label="Barva"   val={f.palette.name} />
         <Row label="GDPR"    val={f.gdprMode === "auto" ? "Automaticky" : "Vlastní text"} />
@@ -204,7 +401,7 @@ function StepShrnutí({ f, onPay }) {
 function LoadingScreen({ name }) {
   const [t, setT] = useState(0);
   useEffect(() => { const id = setInterval(() => setT(n => n + 1), 600); return () => clearInterval(id); }, []);
-  const steps = ["Analyzuji obor podnikání","Vybírám vhodný design","Generuji obsah sekcí","Vytvářím vizuální styl","Skládám finální web"];
+  const steps = ["Analyzuji obor podnikání","Vybírám vhodný design","Generuji obsah sekcí","Vytvářím vizuální styl","Vkládám vaše fotografie"];
   return (
     <div style={{ minHeight: "100vh", background: C.bg, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "inherit" }}>
       <div style={{ textAlign: "center", maxWidth: 420, padding: 32 }}>
@@ -286,6 +483,9 @@ export default function App() {
     reviews: [],
     palette: PALETTES[0],
     gdprMode: "auto", gdprCustom: "",
+    heroImage: null,
+    gallery: [null, null, null, null, null, null],
+    logo: null,
   });
 
   const upd = (k, v) => setF(p => ({ ...p, [k]: v }));
@@ -304,13 +504,17 @@ export default function App() {
     try {
       const services = f.services.filter(s => s.trim());
       const reviews = f.reviews.filter(r => r.text.trim());
+      const galleryUploaded = f.gallery.filter(Boolean);
+      const galleryCount = galleryUploaded.length;
+      const hasHero = !!f.heroImage;
+      const hasLogo = !!f.logo;
       const gdpr = f.gdprMode === "custom" && f.gdprCustom.trim()
         ? f.gdprCustom.trim()
         : `Správce osobních údajů: ${f.companyName}, IČO: ${f.ico}, ${f.address} ${f.city}. Osobní údaje (jméno, email, telefon) jsou zpracovávány výhradně za účelem odpovědi na Vaši poptávku, na základě oprávněného zájmu správce dle čl. 6 odst. 1 písm. f) GDPR. Údaje nejsou předávány třetím stranám. Kontakt: ${f.email}.`;
 
-      const prompt = `Jsi prémiový český webdesignér se specializací na profesionální one-page weby pro malé české firmy. Tvůj cíl: vytvořit web, který vypadá jako práce dražší agentury (cena 30-80 tisíc Kč). Web musí budit důvěru, vyniknout nad obyčejnými šablonami a působit profesionálně.
+      const prompt = `Jsi prémiový český webdesignér se specializací na profesionální one-page weby pro malé české firmy. Tvůj cíl: vytvořit web, který vypadá jako práce dražší agentury (cena 30-80 tisíc Kč). Web musí budit důvěru a působit profesionálně.
 
-VRAŤ POUZE čistý HTML kód začínající <!DOCTYPE html>. Bez markdown, bez komentářů mimo HTML, bez textu před nebo za HTML.
+VRAŤ POUZE čistý HTML kód začínající <!DOCTYPE html>. Bez markdown, bez komentářů mimo HTML.
 
 ═══ FIRMA ═══
 Název: ${f.companyName}
@@ -327,98 +531,106 @@ Primární barva: ${f.palette.primary}
 Akcentová barva: ${f.palette.accent}
 Krémové/světlé pozadí: ${f.palette.bg}
 
+═══ NAHRANÉ MATERIÁLY ═══
+${hasLogo ? `LOGO: Klient nahrál vlastní logo → V navigaci a footeru použij <img src="{{LOGO}}" alt="${f.companyName}" style="height:42px;width:auto;object-fit:contain"> místo textového loga.` : "LOGO: NEnahráno → V navigaci a footeru použij stylový textový název firmy v hlavním fontu, weight 800."}
+${hasHero ? `HERO FOTKA: Klient nahrál hero fotku → V hero sekci v pravém sloupci místo CSS dekorativního prvku použij <img src="{{HERO_IMAGE}}" alt="${f.companyName}" style="width:100%;height:600px;object-fit:cover;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.15)">` : "HERO FOTKA: NEnahrána → V hero sekci v pravém sloupci použij CSS dekorativní prvek dle DESIGN DNA oboru (gradient s geometrickými tvary)."}
+GALERIE: Klient nahrál ${galleryCount} fotek z 6.
+${galleryCount > 0 ? `→ Pro nahrané použij <img src="{{GALLERY_N}}" alt="Práce N" style="width:100%;height:100%;object-fit:cover"> kde N je 1 až ${galleryCount}` : ""}
+${galleryCount === 0 ? "→ Pro celou galerii použij 6 šedých CSS placeholderů s textem 📷 Vaše práce" : ""}
+${galleryCount > 0 && galleryCount < 6 ? `→ Zbývajících ${6 - galleryCount} dlaždic vyplň šedými CSS placeholdery s textem 📷 Vaše práce` : ""}
+
 ═══ KROK 1: ANALYZUJ OBOR — TOTO JE NEJDŮLEŽITĚJŠÍ ═══
 
-Přečti si pole "Obor: ${f.industry}" a urči vhodnou DESIGN DNA pro tento typ podnikání. Tady jsou referenční mapování (pokud obor nesedí přesně, vyber nejbližší):
+Přečti pole "Obor: ${f.industry}" a urči vhodnou DESIGN DNA. Mapování:
 
 ŘEMESLO (truhlář, tesař, zedník, malíř, klempíř, podlahář, kameník, obkladač):
 → Hero pattern: jemné dřevěné textury z CSS gradientů, organické tvary
 → Fonty: nadpisy "Plus Jakarta Sans" weight 800, tělo "Inter"
 → Atmosféra: poctivost, tradice, vlastní ruka, "uděláme to správně"
-→ Microcopy: "Práce od srdce", "Stavíme/tvoříme/měníme...", konkrétní hmatatelné výsledky
+→ Microcopy: "Práce od srdce", konkrétní hmatatelné výsledky
 → Ikonografie: 🪵 🔨 🛠 🏠 ⚒ 🪚
 
 INSTALATÉR / ELEKTRIKÁŘ / TOPENÁŘ / SERVIS:
 → Hero pattern: technický geometrický pattern, modré odstíny, čistota
 → Fonty: nadpisy "Inter" weight 700, tělo "Inter"
-→ Atmosféra: spolehlivost, rychlost, 24/7, "voláme zpátky do hodiny"
-→ Microcopy: "Vyřešíme to rychle", "Nečekáte týden", "Volejte kdykoli"
+→ Atmosféra: spolehlivost, rychlost, 24/7
+→ Microcopy: "Vyřešíme to rychle", "Volejte kdykoli"
 → Ikonografie: 🔧 ⚡ 💧 🚿 🔩 ⚙
 
 KRÁSA (kadeřnictví, kosmetika, manikúra, masáže):
 → Hero pattern: jemný gradient, soft shapes, asymetrické vlnky
-→ Fonty: nadpisy "Playfair Display" nebo "DM Serif Display", tělo "Inter"
-→ Atmosféra: péče, elegance, "péče o vás"
-→ Microcopy: "Cítíte se jako nová", "Náš salon", "Rezervujte si chvíli pro sebe"
+→ Fonty: nadpisy "Playfair Display", tělo "Inter"
+→ Atmosféra: péče, elegance
+→ Microcopy: "Cítíte se jako nová", "Náš salon"
 → Ikonografie: ✨ 💆 💅 💇 🌸 🤍
 
 PRÁVO / FINANCE / ÚČETNICTVÍ / KONZULTING:
-→ Hero pattern: minimalistický, mnoho bílého prostoru, decentní geometrie
+→ Hero pattern: minimalistický, mnoho bílého prostoru
 → Fonty: nadpisy "Plus Jakarta Sans" weight 700, tělo "Inter"
-→ Atmosféra: precizní, profesionální, "rozumíme tomu za vás"
-→ Microcopy: "Jistota v každém kroku", "Bez vás se neobejdeme", "Vaše čísla pod kontrolou"
+→ Atmosféra: precizní, profesionální
+→ Microcopy: "Jistota v každém kroku", "Vaše čísla pod kontrolou"
 → Ikonografie: ⚖ 📊 📈 💼 📑 ✅
 
 ZDRAVOTNICTVÍ (lékař, fyzio, zubař, terapeut):
-→ Hero pattern: čistý, klidný, moderní, minimum vizuálního šumu
+→ Hero pattern: čistý, klidný, modern
 → Fonty: nadpisy "Inter" weight 700, tělo "Inter"
-→ Atmosféra: klid, jistota, "jste v dobrých rukou"
-→ Microcopy: "Pečujeme o vás komplexně", "Klidná návštěva", "Špičkové vybavení"
+→ Atmosféra: klid, jistota
+→ Microcopy: "Pečujeme o vás komplexně"
 → Ikonografie: 🩺 💊 🦷 ❤ 🫀 🌿
 
 GASTRONOMIE (restaurace, kavárna, pekárna):
-→ Hero pattern: teplý gradient s organickými tvary, tlumená paleta
+→ Hero pattern: teplý gradient s organickými tvary
 → Fonty: nadpisy "Playfair Display", tělo "Inter"
-→ Atmosféra: pohostinnost, chuť, "u nás se zastavíte"
-→ Microcopy: "Vaříme s láskou", "Místo, kam se rádi vracíte", "Otevřeno denně"
+→ Atmosféra: pohostinnost, chuť
+→ Microcopy: "Vaříme s láskou"
 → Ikonografie: ☕ 🍰 🥐 🍴 🍷 🍞
 
 FITNESS / TRENÉR / SPORT:
-→ Hero pattern: dynamický, kontrastní, šikmé linky, energie
+→ Hero pattern: dynamický, kontrastní, šikmé linky
 → Fonty: nadpisy "Plus Jakarta Sans" weight 800 italic, tělo "Inter"
-→ Atmosféra: energie, výzva, "můžete víc"
-→ Microcopy: "Začněte hned", "Posuňte se dál", "Bez výmluv"
+→ Atmosféra: energie, výzva
+→ Microcopy: "Začněte hned", "Posuňte se dál"
 → Ikonografie: 💪 🏋 🔥 ⚡ 🏃 🥇
 
 STAVEBNICTVÍ / DEVELOPER:
-→ Hero pattern: silný, geometrický, blueprintové linky
+→ Hero pattern: silný, geometrický, blueprint linky
 → Fonty: nadpisy "Plus Jakarta Sans" weight 800, tělo "Inter"
-→ Atmosféra: solidnost, viditelný výsledek, "stavíme na pevných základech"
-→ Microcopy: "Postavíme vám...", "Reference na stovky projektů", "Konkrétní termíny"
+→ Atmosféra: solidnost, viditelný výsledek
+→ Microcopy: "Postavíme vám...", "Konkrétní termíny"
 → Ikonografie: 🏗 🏠 📐 🚧 🔨 🏢
 
 IT / DIGITAL / MARKETING:
 → Hero pattern: moderní geometrie, barevné gradienty, abstraktní tvary
 → Fonty: nadpisy "Plus Jakarta Sans" weight 700, tělo "Inter"
-→ Atmosféra: inovace, expertíza, "rozumíme tomu"
-→ Microcopy: "Posuneme vás dál", "Měřitelné výsledky", "Jasné cíle"
+→ Atmosféra: inovace, expertíza
+→ Microcopy: "Posuneme vás dál", "Měřitelné výsledky"
 → Ikonografie: 💻 📱 🚀 ⚙ 📊 🎯
 
-NEZNÁMÝ OBOR: použij jako default kombinaci IT+Konzulting (čistý, profesionální, moderní)
+NEZNÁMÝ OBOR: kombinace IT+Konzulting (čistý, profesionální, moderní)
 
-═══ KROK 2: VIZUÁLNÍ JAZYK PRO VŠECHNY OBORY ═══
+═══ KROK 2: VIZUÁLNÍ JAZYK ═══
 
 LAYOUT
-- Hodně bílého prostoru, sekce dýchají (padding 80-120px vertical na desktopu)
-- Velká, výrazná typografie: H1 56-72px, H2 36-44px, H3 22-28px na desktopu
+- Hodně bílého prostoru, padding 80-120px vertical
+- Velká typografie: H1 56-72px, H2 36-44px, H3 22-28px desktop
 - Letter-spacing -0.02em pro velké nadpisy, line-height 1.1-1.2
-- Tělo textu 16-18px, line-height 1.65
-- Border-radius 16px pro karty, 10px pro buttony
+- Tělo 16-18px, line-height 1.65
+- Border-radius 16px karty, 10px buttony
 - Box-shadow: 0 4px 24px rgba(0,0,0,0.06)
-- Smooth transitions 0.3s ease, hover efekty
+- Smooth transitions 0.3s ease
 
 BAREVNÉ POUŽITÍ
-- Většina sekcí: krémové/světlé pozadí (${f.palette.bg})
+- Většina sekcí: ${f.palette.bg}
 - Některé sekce: čistá bílá pro kontrast
-- Akcent (${f.palette.primary}): pouze CTA, hover, ikony v kruzích, decorative — NIKDY ne pozadí celých sekcí
-- Text: tmavá #1a1a1a, sekundární text: #6b6b6b
+- Akcent ${f.palette.primary}: pouze CTA, hover, ikony — NIKDY pozadí celých sekcí
+- Text: tmavá #1a1a1a, sekundární: #6b6b6b
 - Footer: tmavé pozadí #0f0f0f s bílým textem
 
-═══ KROK 3: STRUKTURA STRÁNKY ═══
+═══ KROK 3: STRUKTURA ═══
 
 NAVIGACE (sticky)
 - Na začátku průhledná, při scrollu solid white s subtle shadow
-- Logo vlevo (název firmy v hlavním fontu, weight 800)
+- ${hasLogo ? "Logo vlevo (img tag s {{LOGO}})" : "Logo vlevo = název firmy v hlavním fontu, weight 800"}
 - Menu: Domů · O nás · Služby · Jak to probíhá · Galerie${reviews.length ? " · Recenze" : ""} · Kontakt
 - Vpravo malé CTA "Poptávka" (#kontakt)
 - Mobile: hamburger animovaný do plnoobrazovkového menu
@@ -426,32 +638,31 @@ NAVIGACE (sticky)
 HERO (id="home", min-height: 92vh)
 - Layout 2 sloupce na desktopu (60% text vlevo, 40% vizuál vpravo)
 - Levý sloupec:
-  • Malý kicker text nahoře (uppercase, ${f.palette.primary}, 13px, letter-spacing 0.1em) — vymysli pro obor
-  • H1 = SILNÝ HEADLINE (NE jen název firmy!) — vymysli benefit větu specifickou pro obor "${f.industry}", ne generickou
-  • Podtitulek 18-20px, 2 řádky max — co firma dělá pro zákazníka
+  • Kicker text nahoře (uppercase, ${f.palette.primary}, 13px, letter-spacing 0.1em) — vymysli pro obor
+  • H1 = SILNÝ HEADLINE (NE jen název firmy!) — benefit věta specifická pro obor "${f.industry}"
+  • Podtitulek 18-20px, 2 řádky max
   • 2 buttony: primární "Nezávazná poptávka" (#kontakt), sekundární outline "Naše služby" (#sluzby)
-  • Pod buttony 3 trust elementy v řadě s ikonkou ✓: vymysli relevantní pro obor (zkušenosti, počet realizací, garance...)
-- Pravý sloupec: dekorativní vizuální prvek dle DESIGN DNA oboru
-  • CSS pattern: kombinace gradientu (${f.palette.primary} → ${f.palette.accent}) s několika geometrickými tvary v různých průhlednostech
-  • Border-radius 24px, výška 500-600px
+  • Pod buttony 3 trust elementy s ikonkou ✓ (zkušenosti, počet realizací, garance...)
+- Pravý sloupec:
+  ${hasHero ? "• Použij <img src='{{HERO_IMAGE}}' alt='${f.companyName}' style='width:100%;height:600px;object-fit:cover;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.15)'>" : "• CSS pattern dle DESIGN DNA oboru: gradient + geometrické tvary, border-radius 24px, výška 500-600px"}
 
 PROČ MY (id="o-nas")
 - Bílé pozadí, padding 100px 0
-- H2 vlevo nahoře "Proč si vybrat ${f.companyName.split(" ")[0]}" + krátký podnadpis
+- H2 "Proč si vybrat ${f.companyName.split(" ")[0]}" + krátký podnadpis
 - 3 sloupce s benefity v kartách:
-  • Velká emoji ikona z DESIGN DNA oboru v kruhu (60x60px, ${f.palette.primary} s 15% průhlednosti jako pozadí)
+  • Velká emoji ikona z DESIGN DNA v kruhu (60x60px, ${f.palette.primary} s 15% průhlednosti)
   • Nadpis benefitu (22px, weight 700)
-  • 2-3 věty popisu (16px, line-height 1.6, šedý text)
+  • 2-3 věty popisu
 - Vymysli 3 SPECIFICKÉ benefity pro "${f.industry}" — ne obecné "kvalita, rychlost, cena"
 
 SLUŽBY (id="sluzby")
 - Pozadí ${f.palette.bg}, padding 100px 0
 - H2 "Co pro vás děláme" + podnadpis
-- Grid karet (3 sloupce na desktop, 2 na tablet, 1 na mobil)
+- Grid karet (3 sloupce desktop, 2 tablet, 1 mobil)
 - Karta: bílé pozadí, padding 32px, border-radius 16px
-  • Velká emoji ikona z DESIGN DNA oboru vlevo nahoře
+  • Velká emoji ikona z DESIGN DNA vlevo nahoře
   • Nadpis služby (20px weight 700)
-  • 2-3 věty konkrétního popisu — vymysli pro každou službu
+  • 2-3 věty konkrétního popisu
   • Šipka → vpravo dole
 - Hover: translateY(-6px), prohloubený stín
 - Služby: ${services.join(", ")}
@@ -459,15 +670,16 @@ SLUŽBY (id="sluzby")
 JAK TO PROBÍHÁ (id="proces")
 - Bílé pozadí, padding 100px 0
 - H2 "Jak u nás probíhá spolupráce" + podnadpis
-- 4 horizontální kroky (na mobilu vertikálně), spojené tenkou linkou
+- 4 horizontální kroky (mobil vertikálně), spojené tenkou linkou
 - Krok: velké číslo v kruhu (1,2,3,4) v ${f.palette.primary}, nadpis kroku, krátký popis
-- Vymysli 4 logické kroky specifické pro obor (např. řemeslník: "Poptávka → Návštěva → Realizace → Předání")
+- Vymysli 4 logické kroky specifické pro obor
 
 GALERIE (id="galerie")
 - Pozadí ${f.palette.bg}, padding 100px 0
 - H2 "Naše práce" + podnadpis
-- Mřížka 3x2 (6 dlaždic), aspect-ratio 4:3, gap 16px
-- Dlaždice: linear-gradient ze 2 šedých odstínů + emoji "📷" + text "Vaše práce"
+- Mřížka 3x2 (6 dlaždic), aspect-ratio 4:3, gap 16px, border-radius 12px overflow:hidden
+${galleryCount > 0 ? `- Prvních ${galleryCount} dlaždic použij <img src="{{GALLERY_N}}" alt="Práce N" style="width:100%;height:100%;object-fit:cover">` : ""}
+${galleryCount < 6 ? `- ${galleryCount === 0 ? "Všech 6" : `Zbývajících ${6 - galleryCount}`} dlaždic: linear-gradient ze 2 šedých odstínů + emoji 📷 + text "Vaše práce"` : ""}
 - Hover: scale(1.03) + překryvný overlay v ${f.palette.primary} s 20% průhlednosti
 
 ${reviews.length ? `RECENZE (id="recenze")
@@ -481,12 +693,12 @@ ${reviews.length ? `RECENZE (id="recenze")
 ` : ""}
 KONTAKT (id="kontakt")
 - Pozadí ${f.palette.primary} (text bílý), padding 100px 0
-- 2 sloupce na desktopu
+- 2 sloupce desktop
 - Levý sloupec:
   • Kicker "Pojďme to probrat" (uppercase, opacity 0.7)
   • H2 "Kontaktujte nás" v bílé
-  • Podtitulek 2 řádky relevantní pro obor
-  • 4 řádky info v stylových řádcích s ikonami:
+  • Podtitulek 2 řádky
+  • 4 řádky info s ikonami:
     📞 ${f.phone}
     ✉️ ${f.email}
     📍 ${f.address}, ${f.city}
@@ -508,7 +720,7 @@ GDPR (id="gdpr")
 FOOTER
 - Tmavé pozadí #0f0f0f, text bílý, padding 60px 0 30px
 - 3 sloupce: 
-  • Sloupec 1: logo (název firmy weight 800), pod ním krátký claim
+  • Sloupec 1: ${hasLogo ? "<img src='{{LOGO}}' style='height:48px;filter:brightness(0) invert(1)'>" : "logo (název firmy weight 800)"}, pod ním krátký claim
   • Sloupec 2: "Kontakt" + 4 řádky
   • Sloupec 3: "Navigace" + odkazy na sekce
 - Spodní řádek: border-top, padding-top 30px, flex space-between
@@ -516,19 +728,18 @@ FOOTER
   • Vpravo: <a href="#gdpr">Ochrana osobních údajů</a>
 
 ═══ TECHNICKÉ ═══
-- Mobile-first responzivní (640, 768, 1024px breakpoints)
-- CSS proměnné v :root pro barvy a fonty
+- Mobile-first responzivní (640, 768, 1024px)
+- CSS proměnné v :root
 - scroll-behavior: smooth
 - Intersection Observer pro fade-in (opacity 0→1, translateY 30px→0, duration 0.6s)
 - Vše v jednom HTML souboru
 - Sémantické HTML5
-- Focus states (outline 2px solid ${f.palette.primary})
 
 ═══ TÓN COPY ═══
 - Profesionální ale srdečný, ne korporátní
 - Krátké věty, žádné fráze typu "kvalita, profesionalita, spolehlivost"
 - Konkrétní hmatatelné výhody, ne obecné claims
-- VŽDY píšeš v jazyce vhodném pro obor (řemeslník mluví jinak než advokát)
+- Píšeš v jazyce vhodném pro obor
 
 VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
 
@@ -551,6 +762,14 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
       if (!data.content) { alert("API chyba: " + JSON.stringify(data).slice(0, 300)); setLoading(false); return; }
       let raw = data.content.map(b => b.text || "").join("");
       raw = raw.replace(/^```html?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
+
+      // Nahradit placeholdery skutečnými obrázky (base64)
+      if (f.heroImage) raw = raw.replace(/\{\{HERO_IMAGE\}\}/g, f.heroImage);
+      if (f.logo) raw = raw.replace(/\{\{LOGO\}\}/g, f.logo);
+      galleryUploaded.forEach((img, i) => {
+        raw = raw.replace(new RegExp(`\\{\\{GALLERY_${i+1}\\}\\}`, "g"), img);
+      });
+
       setHtml(raw);
       setGenCount(c => c + 1);
       setPreview(true);
@@ -578,7 +797,7 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
               </div>
               <span style={{ fontSize: 12, fontWeight: i === step ? 600 : 400, color: i === step ? C.text : C.muted, whiteSpace: "nowrap" }}>{s}</span>
             </div>
-            {i < STEPS.length - 1 && <div style={{ width: 10, height: 1, background: i < step ? C.accent : C.border, flexShrink: 0 }} />}
+            {i < STEPS.length - 1 && <div style={{ width: 8, height: 1, background: i < step ? C.accent : C.border, flexShrink: 0 }} />}
           </div>
         ))}
       </div>
@@ -586,14 +805,15 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: "24px 20px" }}>
           {step === 0 && <StepFirma   f={f} upd={upd} />}
           {step === 1 && <StepSluzby  f={f} upd={upd} />}
-          {step === 2 && <StepKontakt f={f} upd={upd} />}
-          {step === 3 && <StepRecenze f={f} upd={upd} />}
-          {step === 4 && <StepBarvy   f={f} upd={upd} />}
-          {step === 5 && <StepShrnutí f={f} onPay={handlePay} />}
-          {step < 5 && (
+          {step === 2 && <StepFotky   f={f} upd={upd} />}
+          {step === 3 && <StepKontakt f={f} upd={upd} />}
+          {step === 4 && <StepRecenze f={f} upd={upd} />}
+          {step === 5 && <StepBarvy   f={f} upd={upd} />}
+          {step === 6 && <StepShrnutí f={f} onPay={handlePay} />}
+          {step < 6 && (
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 26, gap: 12 }}>
               {step > 0 ? <button style={btnB} onClick={() => setStep(s => s - 1)}>← Zpět</button> : <div />}
-              <button style={btnA} onClick={() => setStep(s => s + 1)}>{step === 4 ? "Zkontrolovat shrnutí →" : "Pokračovat →"}</button>
+              <button style={btnA} onClick={() => setStep(s => s + 1)}>{step === 5 ? "Zkontrolovat shrnutí →" : "Pokračovat →"}</button>
             </div>
           )}
         </div>
