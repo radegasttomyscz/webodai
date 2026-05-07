@@ -2,18 +2,13 @@ import { useState, useEffect } from "react";
 
 const MAX_GENERATIONS = 3;
 const PALETTES = [
-  { id: "mustard", name: "Hořčicová", primary: "#c9963d", accent: "#d4a850", bg: "#faf7f2", label: "Řemeslná" },
-  { id: "navy",    name: "Námořnická", primary: "#1e3a8a", accent: "#3b82f6", bg: "#f0f6ff", label: "Důvěryhodná" },
-  { id: "forest",  name: "Lesní",     primary: "#15803d", accent: "#16a34a", bg: "#f0fdf4", label: "Přírodní" },
-  { id: "salmon",  name: "Lososová",  primary: "#c2410c", accent: "#f97316", bg: "#fff7ed", label: "Energická" },
-  { id: "burgundy",name: "Vínová",    primary: "#7f1d1d", accent: "#b91c1c", bg: "#fef2f2", label: "Prémiová" },
+  { id: "orange",   name: "Oranžová", primary: "#c2410c", accent: "#f97316", bg: "#fff7ed" },
+  { id: "blue",     name: "Modrá",    primary: "#1e3a8a", accent: "#3b82f6", bg: "#eff6ff" },
+  { id: "green",    name: "Zelená",   primary: "#15803d", accent: "#16a34a", bg: "#f0fdf4" },
+  { id: "dark",     name: "Tmavá",    primary: "#0f172a", accent: "#475569", bg: "#f8fafc" },
+  { id: "burgundy", name: "Vínová",   primary: "#7f1d1d", accent: "#b91c1c", bg: "#fef2f2" },
 ];
-const STYLES = [
-  { id: "modern", emoji: "✦", label: "Moderní",   desc: "Čistý a minimalistický" },
-  { id: "warm",   emoji: "🪵", label: "Řemeslný", desc: "Teplý a osobní" },
-  { id: "bold",   emoji: "⚡", label: "Odvážný",  desc: "Výrazný a silný" },
-];
-const STEPS = ["Firma", "Služby", "Kontakt", "Recenze", "Vzhled", "Shrnutí"];
+const STEPS = ["Firma", "Služby", "Kontakt", "Recenze", "Barvy", "Shrnutí"];
 const C = {
   bg: "#080810", card: "#0f0f1a", card2: "#13131f",
   border: "#1e1e30", accent: "#f97316", text: "#e2e8f0",
@@ -36,7 +31,11 @@ function StepFirma({ f, upd }) {
           <input style={inp} placeholder="12345678" value={f.ico} onChange={e => upd("ico", e.target.value)} maxLength={8} />
           <div style={{ fontSize: 12, color: C.muted, marginTop: 6 }}>Povinný údaj — zobrazí se ve footeru a v GDPR sekci webu</div>
         </div>
-        <div><label style={lbl}>Obor podnikání *</label><input style={inp} placeholder="např. Truhlářství, Instalatérství..." value={f.industry} onChange={e => upd("industry", e.target.value)} /></div>
+        <div>
+          <label style={lbl}>Obor podnikání *</label>
+          <input style={inp} placeholder="např. Truhlářství, Instalatérství, Kadeřnictví, Advokátní kancelář..." value={f.industry} onChange={e => upd("industry", e.target.value)} />
+          <div style={{ fontSize: 12, color: C.muted, marginTop: 6 }}>Důležité — podle oboru se přizpůsobí celý vzhled webu</div>
+        </div>
         <div><label style={lbl}>Popis firmy *</label><textarea style={{ ...inp, height: 100, resize: "vertical" }} placeholder="Pár vět o vaší firmě — co děláte, kde působíte, čím se odlišujete..." value={f.description} onChange={e => upd("description", e.target.value)} /></div>
         <div><label style={lbl}>Rok založení (volitelné)</label><input style={inp} placeholder="např. 2005" value={f.founded} onChange={e => upd("founded", e.target.value)} /></div>
       </div>
@@ -115,38 +114,27 @@ function StepRecenze({ f, upd }) {
   );
 }
 
-function StepGiven({ f, upd }) {
+function StepBarvy({ f, upd }) {
   return (
     <div>
-      <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 700, color: C.text }}>Vzhled & GDPR</h2>
-      <p style={{ color: C.muted, fontSize: 14, margin: "0 0 24px" }}>Barvy, styl a ochrana osobních údajů</p>
+      <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 700, color: C.text }}>Barvy & GDPR</h2>
+      <p style={{ color: C.muted, fontSize: 14, margin: "0 0 24px" }}>Vyberte barvu a nastavte ochranu osobních údajů</p>
+      
       <div style={{ marginBottom: 26 }}>
-        <label style={lbl}>Barevná paleta</label>
+        <label style={lbl}>Barva webu</label>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8 }}>
           {PALETTES.map(p => (
-            <div key={p.id} onClick={() => upd("palette", p)} style={{ border: `2px solid ${f.palette.id === p.id ? C.accent : C.border}`, borderRadius: 12, padding: "10px 6px", cursor: "pointer", textAlign: "center", background: f.palette.id === p.id ? C.accent + "18" : C.input }}>
-              <div style={{ width: 28, height: 28, borderRadius: "50%", background: p.primary, margin: "0 auto 6px", border: `3px solid ${p.accent}` }} />
-              <div style={{ fontSize: 11, fontWeight: 600, color: C.text }}>{p.name}</div>
-              <div style={{ fontSize: 10, color: C.muted }}>{p.label}</div>
+            <div key={p.id} onClick={() => upd("palette", p)} style={{ border: `2px solid ${f.palette.id === p.id ? C.accent : C.border}`, borderRadius: 12, padding: "12px 6px", cursor: "pointer", textAlign: "center", background: f.palette.id === p.id ? C.accent + "18" : C.input }}>
+              <div style={{ width: 36, height: 36, borderRadius: "50%", background: p.primary, margin: "0 auto 8px", border: `3px solid ${p.accent}` }} />
+              <div style={{ fontSize: 12, fontWeight: 600, color: C.text }}>{p.name}</div>
             </div>
           ))}
         </div>
-      </div>
-      <div style={{ marginBottom: 26 }}>
-        <label style={lbl}>Styl webu</label>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {STYLES.map(s => (
-            <div key={s.id} onClick={() => upd("style", s.id)} style={{ border: `2px solid ${f.style === s.id ? C.accent : C.border}`, borderRadius: 12, padding: "12px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, background: f.style === s.id ? C.accent + "18" : C.input }}>
-              <span style={{ fontSize: 22 }}>{s.emoji}</span>
-              <div>
-                <div style={{ fontWeight: 600, color: C.text, fontSize: 14 }}>{s.label}</div>
-                <div style={{ fontSize: 12, color: C.muted }}>{s.desc}</div>
-              </div>
-              {f.style === s.id && <span style={{ marginLeft: "auto", color: C.accent, fontWeight: 700 }}>✓</span>}
-            </div>
-          ))}
+        <div style={{ marginTop: 12, padding: "10px 14px", background: C.input, borderRadius: 8, border: `1px solid ${C.border}`, fontSize: 12, color: C.muted, lineHeight: 1.5 }}>
+          ℹ️ Styl webu (moderní, řemeslný, korporátní…) <strong style={{ color: C.text }}>vybere AI automaticky podle oboru</strong> vašeho podnikání.
         </div>
       </div>
+
       <div>
         <label style={lbl}>Zásady ochrany osobních údajů</label>
         <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
@@ -195,8 +183,7 @@ function StepShrnutí({ f, onPay }) {
         <Row label="Adresa"  val={[f.address, f.city].filter(Boolean).join(", ")} />
         <Row label="Služby"  val={services.join(", ")} />
         <Row label="Recenze" val={reviews.length ? `${reviews.length}×` : "žádné"} />
-        <Row label="Styl"    val={STYLES.find(s => s.id === f.style)?.label} />
-        <Row label="Barvy"   val={f.palette.name} />
+        <Row label="Barva"   val={f.palette.name} />
         <Row label="GDPR"    val={f.gdprMode === "auto" ? "Automaticky" : "Vlastní text"} />
       </div>
       <div style={{ background: "#091a0f", border: `1px solid ${C.success}40`, borderRadius: 12, padding: 18, marginBottom: 18 }}>
@@ -220,7 +207,7 @@ function StepShrnutí({ f, onPay }) {
 function LoadingScreen({ name }) {
   const [t, setT] = useState(0);
   useEffect(() => { const id = setInterval(() => setT(n => n + 1), 600); return () => clearInterval(id); }, []);
-  const steps = ["Analyzuji informace o firmě","Navrhuji strukturu webu","Generuji obsah sekcí","Vytvářím design a styly","Skládám finální web"];
+  const steps = ["Analyzuji obor podnikání","Vybírám vhodný design","Generuji obsah sekcí","Vytvářím vizuální styl","Skládám finální web"];
   return (
     <div style={{ minHeight: "100vh", background: C.bg, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "inherit" }}>
       <div style={{ textAlign: "center", maxWidth: 420, padding: 32 }}>
@@ -300,7 +287,7 @@ export default function App() {
     services: ["", "", ""],
     phone: "", email: "", address: "", city: "",
     reviews: [],
-    palette: PALETTES[0], style: "modern",
+    palette: PALETTES[0],
     gdprMode: "auto", gdprCustom: "",
   });
 
@@ -324,11 +311,11 @@ export default function App() {
         ? f.gdprCustom.trim()
         : `Správce osobních údajů: ${f.companyName}, IČO: ${f.ico}, ${f.address} ${f.city}. Osobní údaje (jméno, email, telefon) jsou zpracovávány výhradně za účelem odpovědi na Vaši poptávku, na základě oprávněného zájmu správce dle čl. 6 odst. 1 písm. f) GDPR. Údaje nejsou předávány třetím stranám. Kontakt: ${f.email}.`;
 
-      const prompt = `Jsi prémiový český webdesignér. Tvým úkolem je vytvořit profesionální one-page web pro malou českou firmu, který vypadá jako práce dražší agentury (cena 30-80 tisíc Kč). Zákazník nesmí poznat, že web vznikl rychle pomocí AI.
+      const prompt = `Jsi prémiový český webdesignér se specializací na profesionální one-page weby pro malé české firmy. Tvůj cíl: vytvořit web, který vypadá jako práce dražší agentury (cena 30-80 tisíc Kč). Web musí budit důvěru, vyniknout nad obyčejnými šablonami a působit profesionálně.
 
 VRAŤ POUZE čistý HTML kód začínající <!DOCTYPE html>. Bez markdown, bez komentářů mimo HTML, bez textu před nebo za HTML.
 
-═══ ÚDAJE O FIRMĚ ═══
+═══ FIRMA ═══
 Název: ${f.companyName}
 IČO: ${f.ico}
 Obor: ${f.industry}
@@ -341,71 +328,134 @@ Adresa: ${f.address}, ${f.city}
 ${reviews.length ? `Recenze:\n${reviews.map(r => `- ${r.stars}★ "${r.text}" — ${r.name}`).join("\n")}` : ""}
 Primární barva: ${f.palette.primary}
 Akcentová barva: ${f.palette.accent}
-Pozadí krémové/světlé: ${f.palette.bg}
+Krémové/světlé pozadí: ${f.palette.bg}
 
-═══ DESIGN FILOZOFIE — DODRŽ STRIKTNĚ ═══
+═══ KROK 1: ANALYZUJ OBOR — TOTO JE NEJDŮLEŽITĚJŠÍ ═══
 
-VIZUÁLNÍ JAZYK
+Přečti si pole "Obor: ${f.industry}" a urči vhodnou DESIGN DNA pro tento typ podnikání. Tady jsou referenční mapování (pokud obor nesedí přesně, vyber nejbližší):
+
+ŘEMESLO (truhlář, tesař, zedník, malíř, klempíř, podlahář, kameník, obkladač):
+→ Hero pattern: jemné dřevěné textury z CSS gradientů, organické tvary
+→ Fonty: nadpisy "Plus Jakarta Sans" weight 800, tělo "Inter"
+→ Atmosféra: poctivost, tradice, vlastní ruka, "uděláme to správně"
+→ Microcopy: "Práce od srdce", "Stavíme/tvoříme/měníme...", konkrétní hmatatelné výsledky
+→ Ikonografie: 🪵 🔨 🛠 🏠 ⚒ 🪚
+
+INSTALATÉR / ELEKTRIKÁŘ / TOPENÁŘ / SERVIS:
+→ Hero pattern: technický geometrický pattern, modré odstíny, čistota
+→ Fonty: nadpisy "Inter" weight 700, tělo "Inter"
+→ Atmosféra: spolehlivost, rychlost, 24/7, "voláme zpátky do hodiny"
+→ Microcopy: "Vyřešíme to rychle", "Nečekáte týden", "Volejte kdykoli"
+→ Ikonografie: 🔧 ⚡ 💧 🚿 🔩 ⚙
+
+KRÁSA (kadeřnictví, kosmetika, manikúra, masáže):
+→ Hero pattern: jemný gradient, soft shapes, asymetrické vlnky
+→ Fonty: nadpisy "Playfair Display" nebo "DM Serif Display", tělo "Inter"
+→ Atmosféra: péče, elegance, "péče o vás"
+→ Microcopy: "Cítíte se jako nová", "Náš salon", "Rezervujte si chvíli pro sebe"
+→ Ikonografie: ✨ 💆 💅 💇 🌸 🤍
+
+PRÁVO / FINANCE / ÚČETNICTVÍ / KONZULTING:
+→ Hero pattern: minimalistický, mnoho bílého prostoru, decentní geometrie
+→ Fonty: nadpisy "Plus Jakarta Sans" weight 700, tělo "Inter"
+→ Atmosféra: precizní, profesionální, "rozumíme tomu za vás"
+→ Microcopy: "Jistota v každém kroku", "Bez vás se neobejdeme", "Vaše čísla pod kontrolou"
+→ Ikonografie: ⚖ 📊 📈 💼 📑 ✅
+
+ZDRAVOTNICTVÍ (lékař, fyzio, zubař, terapeut):
+→ Hero pattern: čistý, klidný, moderní, minimum vizuálního šumu
+→ Fonty: nadpisy "Inter" weight 700, tělo "Inter"
+→ Atmosféra: klid, jistota, "jste v dobrých rukou"
+→ Microcopy: "Pečujeme o vás komplexně", "Klidná návštěva", "Špičkové vybavení"
+→ Ikonografie: 🩺 💊 🦷 ❤ 🫀 🌿
+
+GASTRONOMIE (restaurace, kavárna, pekárna):
+→ Hero pattern: teplý gradient s organickými tvary, tlumená paleta
+→ Fonty: nadpisy "Playfair Display", tělo "Inter"
+→ Atmosféra: pohostinnost, chuť, "u nás se zastavíte"
+→ Microcopy: "Vaříme s láskou", "Místo, kam se rádi vracíte", "Otevřeno denně"
+→ Ikonografie: ☕ 🍰 🥐 🍴 🍷 🍞
+
+FITNESS / TRENÉR / SPORT:
+→ Hero pattern: dynamický, kontrastní, šikmé linky, energie
+→ Fonty: nadpisy "Plus Jakarta Sans" weight 800 italic, tělo "Inter"
+→ Atmosféra: energie, výzva, "můžete víc"
+→ Microcopy: "Začněte hned", "Posuňte se dál", "Bez výmluv"
+→ Ikonografie: 💪 🏋 🔥 ⚡ 🏃 🥇
+
+STAVEBNICTVÍ / DEVELOPER:
+→ Hero pattern: silný, geometrický, blueprintové linky
+→ Fonty: nadpisy "Plus Jakarta Sans" weight 800, tělo "Inter"
+→ Atmosféra: solidnost, viditelný výsledek, "stavíme na pevných základech"
+→ Microcopy: "Postavíme vám...", "Reference na stovky projektů", "Konkrétní termíny"
+→ Ikonografie: 🏗 🏠 📐 🚧 🔨 🏢
+
+IT / DIGITAL / MARKETING:
+→ Hero pattern: moderní geometrie, barevné gradienty, abstraktní tvary
+→ Fonty: nadpisy "Plus Jakarta Sans" weight 700, tělo "Inter"
+→ Atmosféra: inovace, expertíza, "rozumíme tomu"
+→ Microcopy: "Posuneme vás dál", "Měřitelné výsledky", "Jasné cíle"
+→ Ikonografie: 💻 📱 🚀 ⚙ 📊 🎯
+
+NEZNÁMÝ OBOR: použij jako default kombinaci IT+Konzulting (čistý, profesionální, moderní)
+
+═══ KROK 2: VIZUÁLNÍ JAZYK PRO VŠECHNY OBORY ═══
+
+LAYOUT
 - Hodně bílého prostoru, sekce dýchají (padding 80-120px vertical na desktopu)
-- Velká, výrazná typografie: H1 dosahuje 56-72px, H2 36-44px, H3 22-28px na desktopu
+- Velká, výrazná typografie: H1 56-72px, H2 36-44px, H3 22-28px na desktopu
 - Letter-spacing -0.02em pro velké nadpisy, line-height 1.1-1.2
 - Tělo textu 16-18px, line-height 1.65
-- Cards: jemný stín box-shadow: 0 4px 24px rgba(0,0,0,0.06), border-radius 16px
-- Buttons: border-radius 10px, padding 14px 28px, font-weight 600
-- Smooth transitions 0.3s ease všude
-- Hover na kartách: translateY(-4px) + prohloubený stín
-
-TYPOGRAFIE — Google Fonts
-- Nadpisy: "Plus Jakarta Sans" weight 700-800
-- Tělo: "Inter" weight 400-500
-- Importuj jednou v <head>
+- Border-radius 16px pro karty, 10px pro buttony
+- Box-shadow: 0 4px 24px rgba(0,0,0,0.06)
+- Smooth transitions 0.3s ease, hover efekty
 
 BAREVNÉ POUŽITÍ
 - Většina sekcí: krémové/světlé pozadí (${f.palette.bg})
 - Některé sekce: čistá bílá pro kontrast
-- Akcent (${f.palette.primary}): pouze pro CTA, hover, ikony v kruzích, decorative prvky — NIKDY ne jako celé pozadí velkých sekcí
+- Akcent (${f.palette.primary}): pouze CTA, hover, ikony v kruzích, decorative — NIKDY ne pozadí celých sekcí
 - Text: tmavá #1a1a1a, sekundární text: #6b6b6b
 - Footer: tmavé pozadí #0f0f0f s bílým textem
 
-═══ POVINNÁ STRUKTURA ═══
+═══ KROK 3: STRUKTURA STRÁNKY ═══
 
-NAVIGACE
-- Sticky top, na začátku průhledná, při scrollu solid white s subtle shadow
-- Logo vlevo (název firmy v Plus Jakarta Sans, weight 800)
-- Menu vpravo: Domů · O nás · Služby · Jak to probíhá · Galerie${reviews.length ? " · Recenze" : ""} · Kontakt
+NAVIGACE (sticky)
+- Na začátku průhledná, při scrollu solid white s subtle shadow
+- Logo vlevo (název firmy v hlavním fontu, weight 800)
+- Menu: Domů · O nás · Služby · Jak to probíhá · Galerie${reviews.length ? " · Recenze" : ""} · Kontakt
 - Vpravo malé CTA "Poptávka" (#kontakt)
 - Mobile: hamburger animovaný do plnoobrazovkového menu
 
 HERO (id="home", min-height: 92vh)
 - Layout 2 sloupce na desktopu (60% text vlevo, 40% vizuál vpravo)
 - Levý sloupec:
-  • Malý kicker text nahoře (uppercase, primární barva, 13px, letter-spacing 0.1em) — vymysli krátký pro obor "${f.industry}"
-  • H1 = ZAJÍMAVÝ HEADLINE (NE jen název firmy!) — vymysli silnou benefit větu pro obor (např. truhlář: "Nábytek, který přežije generace", instalatér: "Voda v domě bez starostí, 24/7")
-  • Podtitulek 18-20px, 2 řádky max — řeší co firma dělá pro zákazníka
+  • Malý kicker text nahoře (uppercase, ${f.palette.primary}, 13px, letter-spacing 0.1em) — vymysli pro obor
+  • H1 = SILNÝ HEADLINE (NE jen název firmy!) — vymysli benefit větu specifickou pro obor "${f.industry}", ne generickou
+  • Podtitulek 18-20px, 2 řádky max — co firma dělá pro zákazníka
   • 2 buttony: primární "Nezávazná poptávka" (#kontakt), sekundární outline "Naše služby" (#sluzby)
-  • Pod buttony 3 trust elementy v řadě: "✓ Více než X let zkušeností  ✓ Stovky spokojených klientů  ✓ Garance kvality" (vymysli relevantní pro obor a roky)
-- Pravý sloupec: dekorativní vizuální prvek
-  • CSS pattern: kombinace gradientu (${f.palette.primary} → ${f.palette.accent}) s několika geometrickými tvary (kruhy, kosočtverce) v různých průhlednostech, působí jako moderní art piece
+  • Pod buttony 3 trust elementy v řadě s ikonkou ✓: vymysli relevantní pro obor (zkušenosti, počet realizací, garance...)
+- Pravý sloupec: dekorativní vizuální prvek dle DESIGN DNA oboru
+  • CSS pattern: kombinace gradientu (${f.palette.primary} → ${f.palette.accent}) s několika geometrickými tvary v různých průhlednostech
   • Border-radius 24px, výška 500-600px
 
-SEKCE PROČ MY (id="o-nas")
+PROČ MY (id="o-nas")
 - Bílé pozadí, padding 100px 0
 - H2 vlevo nahoře "Proč si vybrat ${f.companyName.split(" ")[0]}" + krátký podnadpis
 - 3 sloupce s benefity v kartách:
-  • Velká emoji ikona v kruhu (60x60px, ${f.palette.primary} s 15% průhlednosti jako pozadí)
+  • Velká emoji ikona z DESIGN DNA oboru v kruhu (60x60px, ${f.palette.primary} s 15% průhlednosti jako pozadí)
   • Nadpis benefitu (22px, weight 700)
   • 2-3 věty popisu (16px, line-height 1.6, šedý text)
-- Vymysli 3 SPECIFICKÉ benefity pro "${f.industry}" — NE obecné "kvalita, rychlost, cena". Buď konkrétní.
+- Vymysli 3 SPECIFICKÉ benefity pro "${f.industry}" — ne obecné "kvalita, rychlost, cena"
 
 SLUŽBY (id="sluzby")
 - Pozadí ${f.palette.bg}, padding 100px 0
-- H2 "Co pro vás děláme" + podnadpis o tom, co všechno řeší
+- H2 "Co pro vás děláme" + podnadpis
 - Grid karet (3 sloupce na desktop, 2 na tablet, 1 na mobil)
 - Karta: bílé pozadí, padding 32px, border-radius 16px
-  • Velká emoji ikona vlevo nahoře
+  • Velká emoji ikona z DESIGN DNA oboru vlevo nahoře
   • Nadpis služby (20px weight 700)
-  • 2-3 věty popisu — vymysli pro každou službu konkrétní hodnotu
-  • Šipka → vpravo dole (decorative, ${f.palette.primary})
+  • 2-3 věty konkrétního popisu — vymysli pro každou službu
+  • Šipka → vpravo dole
 - Hover: translateY(-6px), prohloubený stín
 - Služby: ${services.join(", ")}
 
@@ -414,13 +464,13 @@ JAK TO PROBÍHÁ (id="proces")
 - H2 "Jak u nás probíhá spolupráce" + podnadpis
 - 4 horizontální kroky (na mobilu vertikálně), spojené tenkou linkou
 - Krok: velké číslo v kruhu (1,2,3,4) v ${f.palette.primary}, nadpis kroku, krátký popis
-- Vymysli 4 logické kroky pro obor (např. "Poptávka → Konzultace → Realizace → Předání"). Vymysli vhodné nadpisy pro tento obor.
+- Vymysli 4 logické kroky specifické pro obor (např. řemeslník: "Poptávka → Návštěva → Realizace → Předání")
 
 GALERIE (id="galerie")
 - Pozadí ${f.palette.bg}, padding 100px 0
 - H2 "Naše práce" + podnadpis
 - Mřížka 3x2 (6 dlaždic), aspect-ratio 4:3, gap 16px
-- Dlaždice: linear-gradient ze 2 šedých odstínů + střední emoji "📷" + text "Vaše práce"
+- Dlaždice: linear-gradient ze 2 šedých odstínů + emoji "📷" + text "Vaše práce"
 - Hover: scale(1.03) + překryvný overlay v ${f.palette.primary} s 20% průhlednosti
 
 ${reviews.length ? `RECENZE (id="recenze")
@@ -438,7 +488,7 @@ KONTAKT (id="kontakt")
 - Levý sloupec:
   • Kicker "Pojďme to probrat" (uppercase, opacity 0.7)
   • H2 "Kontaktujte nás" v bílé
-  • Podtitulek 2 řádky
+  • Podtitulek 2 řádky relevantní pro obor
   • 4 řádky info v stylových řádcích s ikonami:
     📞 ${f.phone}
     ✉️ ${f.email}
@@ -455,8 +505,8 @@ KONTAKT (id="kontakt")
 GDPR (id="gdpr")
 - Bílé pozadí, padding 80px 0
 - Max-width 800px, centered
-- H2 "Zásady ochrany osobních údajů" (menší, 28px)
-- Text v 16px line-height 1.7: ${gdpr}
+- H2 "Zásady ochrany osobních údajů" (28px)
+- Text 16px line-height 1.7: ${gdpr}
 
 FOOTER
 - Tmavé pozadí #0f0f0f, text bílý, padding 60px 0 30px
@@ -468,20 +518,20 @@ FOOTER
   • Vlevo: © ${new Date().getFullYear()} ${f.companyName} | IČO: ${f.ico}
   • Vpravo: <a href="#gdpr">Ochrana osobních údajů</a>
 
-═══ TECHNICKÉ POŽADAVKY ═══
-- Mobile-first responzivní s breakpointy 640, 768, 1024px
-- CSS proměnné v :root pro všechny barvy a fonty
+═══ TECHNICKÉ ═══
+- Mobile-first responzivní (640, 768, 1024px breakpoints)
+- CSS proměnné v :root pro barvy a fonty
 - scroll-behavior: smooth
-- Intersection Observer pro fade-in sekcí (opacity 0→1, translateY 30px→0, duration 0.6s)
-- Vše v jednom HTML souboru, žádné externí knihovny
-- Sémantické HTML5 (header, nav, main, section, footer)
-- Focus states na všech interaktivních prvcích (outline 2px solid ${f.palette.primary})
+- Intersection Observer pro fade-in (opacity 0→1, translateY 30px→0, duration 0.6s)
+- Vše v jednom HTML souboru
+- Sémantické HTML5
+- Focus states (outline 2px solid ${f.palette.primary})
 
 ═══ TÓN COPY ═══
 - Profesionální ale srdečný, ne korporátní
 - Krátké věty, žádné fráze typu "kvalita, profesionalita, spolehlivost"
 - Konkrétní hmatatelné výhody, ne obecné claims
-- Skutečně přemýšlej co majitel firmy "${f.companyName}" v oboru "${f.industry}" dělá pro zákazníka
+- VŽDY píšeš v jazyce vhodném pro obor (řemeslník mluví jinak než advokát)
 
 VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
 
@@ -541,7 +591,7 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
           {step === 1 && <StepSluzby  f={f} upd={upd} />}
           {step === 2 && <StepKontakt f={f} upd={upd} />}
           {step === 3 && <StepRecenze f={f} upd={upd} />}
-          {step === 4 && <StepGiven   f={f} upd={upd} />}
+          {step === 4 && <StepBarvy   f={f} upd={upd} />}
           {step === 5 && <StepShrnutí f={f} onPay={handlePay} />}
           {step < 5 && (
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 26, gap: 12 }}>
