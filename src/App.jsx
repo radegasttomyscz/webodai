@@ -34,7 +34,7 @@ function StepFirma({ f, upd }) {
         <div>
           <label style={lbl}>Obor podnikání *</label>
           <input style={inp} placeholder="např. Truhlářství, Instalatérství, Kadeřnictví, Advokátní kancelář..." value={f.industry} onChange={e => upd("industry", e.target.value)} />
-          <div style={{ fontSize: 12, color: C.muted, marginTop: 6 }}>Důležité — podle oboru se přizpůsobí celý vzhled webu</div>
+          <div style={{ fontSize: 12, color: C.muted, marginTop: 6 }}>Důležité — podle oboru se přizpůsobí obsah i vzhled vašeho webu</div>
         </div>
         <div><label style={lbl}>Popis firmy *</label><textarea style={{ ...inp, height: 100, resize: "vertical" }} placeholder="Pár vět o vaší firmě — co děláte, kde působíte, čím se odlišujete..." value={f.description} onChange={e => upd("description", e.target.value)} /></div>
         <div><label style={lbl}>Rok založení (volitelné)</label><input style={inp} placeholder="např. 2005" value={f.founded} onChange={e => upd("founded", e.target.value)} /></div>
@@ -130,9 +130,6 @@ function StepBarvy({ f, upd }) {
             </div>
           ))}
         </div>
-        <div style={{ marginTop: 12, padding: "10px 14px", background: C.input, borderRadius: 8, border: `1px solid ${C.border}`, fontSize: 12, color: C.muted, lineHeight: 1.5 }}>
-          ℹ️ Styl webu (moderní, řemeslný, korporátní…) <strong style={{ color: C.text }}>vybere AI automaticky podle oboru</strong> vašeho podnikání.
-        </div>
       </div>
 
       <div>
@@ -154,7 +151,7 @@ function StepBarvy({ f, upd }) {
             </div>
           ))}
         </div>
-        {f.gdprMode === "auto" && <div style={{ padding: "10px 14px", background: C.input, borderRadius: 8, border: `1px solid ${C.border}`, fontSize: 12, color: C.muted, lineHeight: 1.5 }}>ℹ️ Vygenerovaný text je základní šablona. <strong style={{ color: C.text }}>Provozovatel webu (vy) nese plnou odpovědnost za soulad s GDPR.</strong></div>}
+        {f.gdprMode === "auto" && <div style={{ padding: "10px 14px", background: C.input, borderRadius: 8, border: `1px solid ${C.border}`, fontSize: 12, color: C.muted, lineHeight: 1.5 }}>ℹ️ Vygenerovaný text je základní šablona pro ochranu osobních údajů, ale může být pro vaše účely dostačující. <strong style={{ color: C.text }}>Provozovatel webu (vy) nese plnou odpovědnost za soulad s GDPR.</strong></div>}
         {f.gdprMode === "custom" && <textarea style={{ ...inp, height: 120, resize: "vertical", fontSize: 13, marginTop: 4 }} placeholder="Vložte sem váš text zásad..." value={f.gdprCustom} onChange={e => upd("gdprCustom", e.target.value)} />}
       </div>
     </div>
