@@ -271,6 +271,28 @@ function StepKontakt({ f, upd }) {
         ].map(({ l, key, ph, type }) => (
           <div key={key}><label style={lbl}>{l}</label><input style={inp} type={type || "text"} placeholder={ph} value={f[key]} onChange={e => upd(key, e.target.value)} /></div>
         ))}
+
+        <div style={{ paddingTop: 8, borderTop: `1px solid ${C.border}` }}>
+          <label style={{ ...lbl, marginTop: 14 }}>Sociální sítě (volitelné)</label>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {[
+              { l: "📘 Facebook",  key: "facebook",  ph: "https://facebook.com/vase-firma" },
+              { l: "📷 Instagram", key: "instagram", ph: "https://instagram.com/vase_firma" },
+              { l: "💼 LinkedIn",  key: "linkedin",  ph: "https://linkedin.com/company/vase-firma" },
+            ].map(({ l, key, ph }) => (
+              <div key={key}>
+                <input style={inp} placeholder={`${l} — ${ph}`} value={f[key]} onChange={e => upd(key, e.target.value)} />
+              </div>
+            ))}
+          </div>
+          <div style={{ fontSize: 12, color: C.muted, marginTop: 8 }}>Vložte celou URL adresu. Ikony se zobrazí ve footeru webu.</div>
+        </div>
+
+        <div style={{ paddingTop: 8, borderTop: `1px solid ${C.border}` }}>
+          <div style={{ padding: "10px 14px", background: C.input, borderRadius: 8, border: `1px solid ${C.border}`, fontSize: 12, color: C.muted, lineHeight: 1.5, marginTop: 10 }}>
+            🗺️ <strong style={{ color: C.text }}>Mapa s adresou</strong> se vygeneruje automaticky z vyplněné adresy a města.
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -355,6 +377,7 @@ function StepShrnutí({ f, onPay }) {
   const services = f.services.filter(s => s.trim());
   const reviews  = f.reviews.filter(r => r.text.trim());
   const galleryCount = f.gallery.filter(Boolean).length;
+  const socialList = [f.facebook && "FB", f.instagram && "IG", f.linkedin && "IN"].filter(Boolean).join(", ");
   const Row = ({ label, val }) => val ? (
     <div style={{ display: "flex", gap: 12, padding: "8px 0", borderBottom: `1px solid ${C.border}` }}>
       <span style={{ color: C.muted, fontSize: 13, minWidth: 100 }}>{label}</span>
@@ -372,6 +395,7 @@ function StepShrnutí({ f, onPay }) {
         <Row label="Tel."    val={f.phone} />
         <Row label="Email"   val={f.email} />
         <Row label="Adresa"  val={[f.address, f.city].filter(Boolean).join(", ")} />
+        <Row label="Sítě"    val={socialList || "—"} />
         <Row label="Služby"  val={services.join(", ")} />
         <Row label="Hero"    val={f.heroImage ? "✓ Nahráno" : "—"} />
         <Row label="Galerie" val={galleryCount > 0 ? `${galleryCount}× foto` : "—"} />
@@ -480,6 +504,7 @@ export default function App() {
     companyName: "", ico: "", industry: "", description: "", founded: "",
     services: ["", "", ""],
     phone: "", email: "", address: "", city: "",
+    facebook: "", instagram: "", linkedin: "",
     reviews: [],
     palette: PALETTES[0],
     gdprMode: "auto", gdprCustom: "",
@@ -508,6 +533,14 @@ export default function App() {
       const galleryCount = galleryUploaded.length;
       const hasHero = !!f.heroImage;
       const hasLogo = !!f.logo;
+      const socials = [
+        f.facebook  && { name: "Facebook",  url: f.facebook,  svg: '<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>' },
+        f.instagram && { name: "Instagram", url: f.instagram, svg: '<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zm0 10.162a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>' },
+        f.linkedin  && { name: "LinkedIn",  url: f.linkedin,  svg: '<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.063 2.063 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>' },
+      ].filter(Boolean);
+      const hasSocial = socials.length > 0;
+      const mapsAddress = encodeURIComponent(`${f.address}, ${f.city}`);
+      const mapsUrl = `https://maps.google.com/maps?q=${mapsAddress}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
       const gdpr = f.gdprMode === "custom" && f.gdprCustom.trim()
         ? f.gdprCustom.trim()
         : `Správce osobních údajů: ${f.companyName}, IČO: ${f.ico}, ${f.address} ${f.city}. Osobní údaje (jméno, email, telefon) jsou zpracovávány výhradně za účelem odpovědi na Vaši poptávku, na základě oprávněného zájmu správce dle čl. 6 odst. 1 písm. f) GDPR. Údaje nejsou předávány třetím stranám. Kontakt: ${f.email}.`;
@@ -703,6 +736,8 @@ KONTAKT (id="kontakt")
     ✉️ ${f.email}
     📍 ${f.address}, ${f.city}
     🕐 Po-Pá: 8:00-17:00
+  • Pod info přidej Google Maps iframe:
+    <iframe src="${mapsUrl}" width="100%" height="280" style="border:0;border-radius:16px;margin-top:24px;filter:grayscale(0.2)" allowfullscreen loading="lazy"></iframe>
 - Pravý sloupec — formulář v BÍLÉ kartě:
   • padding 40px, border-radius 20px
   • Pole: Vaše jméno, Email, Telefon (volitelné), Předmět, Vaše zpráva (textarea 4 řádky)
@@ -720,7 +755,7 @@ GDPR (id="gdpr")
 FOOTER
 - Tmavé pozadí #0f0f0f, text bílý, padding 60px 0 30px
 - 3 sloupce: 
-  • Sloupec 1: ${hasLogo ? "<img src='{{LOGO}}' style='height:48px;filter:brightness(0) invert(1)'>" : "logo (název firmy weight 800)"}, pod ním krátký claim
+  • Sloupec 1: ${hasLogo ? "<img src='{{LOGO}}' style='height:48px;filter:brightness(0) invert(1)'>" : "logo (název firmy weight 800)"}, pod ním krátký claim, ${hasSocial ? `pod tím řada sociálních ikon:\n${socials.map(s => `      <a href="${s.url}" target="_blank" rel="noopener" aria-label="${s.name}" style="display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.08);color:#fff;margin-right:10px;text-decoration:none;transition:all 0.3s">${s.svg}</a>`).join("\n")}\n      Hover efekt: background mění na ${f.palette.primary}` : "bez sociálních sítí"}
   • Sloupec 2: "Kontakt" + 4 řádky
   • Sloupec 3: "Navigace" + odkazy na sekce
 - Spodní řádek: border-top, padding-top 30px, flex space-between
