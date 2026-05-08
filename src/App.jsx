@@ -746,11 +746,20 @@ KONTAKT (id="kontakt")
   • Submit button v ${f.palette.primary}, full-width, padding 16px, font-size 17px, weight 700
   • Form: <form action="mailto:${f.email}" method="post" enctype="text/plain">
 
-GDPR (id="gdpr")
-- Bílé pozadí, padding 80px 0
-- Max-width 800px, centered
-- H2 "Zásady ochrany osobních údajů" (28px)
-- Text 16px line-height 1.7: ${gdpr}
+GDPR — JAKO MODAL POPUP (NE SAMOSTATNÁ SEKCE!)
+- NEVKLÁDEJ GDPR jako sekci na stránce
+- Místo toho přidej HTML modal který se otevře po kliknutí na odkaz "Ochrana osobních údajů" ve footeru
+- Modal HTML struktura (vlož na konec <body>):
+  <div id="gdpr-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)" onclick="if(event.target===this)this.style.display='none'">
+    <div style="background:white;max-width:720px;width:100%;max-height:85vh;border-radius:20px;padding:48px;overflow-y:auto;position:relative;box-shadow:0 30px 80px rgba(0,0,0,0.3)">
+      <button onclick="document.getElementById('gdpr-modal').style.display='none'" style="position:absolute;top:20px;right:20px;width:36px;height:36px;border-radius:50%;border:none;background:#f5f5f5;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center" aria-label="Zavřít">×</button>
+      <h2 style="margin:0 0 24px;font-size:28px;color:#1a1a1a">Zásady ochrany osobních údajů</h2>
+      <div style="font-size:15px;line-height:1.7;color:#444">${gdpr}</div>
+    </div>
+  </div>
+- Ve footeru odkaz: <a href="#" onclick="document.getElementById('gdpr-modal').style.display='flex';return false" style="...">Ochrana osobních údajů</a>
+- Stejný odkaz použij i v GDPR checkboxu kontaktního formuláře (místo href="#gdpr" → onclick handler který otevře modal)
+- ESC klávesa zavře modal: přidej do <script> document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('gdpr-modal').style.display='none'})
 
 FOOTER
 - Tmavé pozadí #0f0f0f, text bílý, padding 60px 0 30px
@@ -785,8 +794,8 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
           "anthropic-version": "2023-06-01",
         },
         body: JSON.stringify({
-model: "claude-haiku-4-5-20251001",
-max_tokens: 14000,
+          model: "claude-sonnet-4-6",
+          max_tokens: 8000,
           messages: [{ role: "user", content: prompt }],
         }),
       });
