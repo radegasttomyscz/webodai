@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import Landing from "./Landing";
 
 const MAX_GENERATIONS = 3;
 const PALETTES = [
@@ -495,6 +496,7 @@ function PreviewScreen({ html, name, genCount, onRegen, onBack }) {
 }
 
 export default function App() {
+  const [started,  setStarted]  = useState(false);
   const [step,     setStep]     = useState(0);
   const [loading,  setLoading]  = useState(false);
   const [html,     setHtml]     = useState(null);
@@ -838,6 +840,7 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
     setLoading(false);
   };
 
+  if (!started)        return <Landing onStart={() => setStarted(true)} />;
   if (loading)         return <LoadingScreen name={f.companyName} />;
   if (preview && html) return <PreviewScreen html={html} name={f.companyName} genCount={genCount} onRegen={generate} onBack={() => setPreview(false)} />;
 
