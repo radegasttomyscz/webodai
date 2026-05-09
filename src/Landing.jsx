@@ -61,7 +61,7 @@ export default function Landing({ onStart }) {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
             {[
               { icon: "💸", title: "Levně", text: "2 000 Kč místo 30–80 tisíc u agentury. Bez měsíčních poplatků navždy." },
-              { icon: "⚡", title: "Rychle", text: "5 minut formuláře a máte web. Žádné týdny komunikace s designérem." },
+              { icon: "⚡", title: "Rychle", text: "Vyplníte formulář za 5 minut a máte web. Žádné týdny komunikace s designérem ani ladění detailů — AI vygeneruje moderní web, za který se nemusíte stydět." },
               { icon: "🎯", title: "Jednoduše", text: "Stáhnete HTML soubor, nahrajete na hosting. Bez složitých systémů." },
             ].map((b, i) => (
               <div key={i} style={{ background: C.card2, border: `1px solid ${C.border}`, borderRadius: 16, padding: 28 }}>
@@ -126,7 +126,7 @@ export default function Landing({ onStart }) {
       <section style={{ padding: "80px 24px" }}>
         <div style={wrap}>
           <h2 style={{ fontSize: 36, fontWeight: 800, textAlign: "center", margin: "0 0 12px", letterSpacing: "-0.02em" }}>Komu se hodí</h2>
-          <p style={{ textAlign: "center", color: C.muted, fontSize: 17, margin: "0 0 56px" }}>Buďte upřímní k sobě.</p>
+          <p style={{ textAlign: "center", color: C.muted, fontSize: 17, margin: "0 0 56px" }}>Naše řešení nesedí každému — radši to řekneme rovnou.</p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
             <div style={{ background: C.success + "12", border: `1px solid ${C.success}40`, borderRadius: 16, padding: 28 }}>
               <div style={{ fontSize: 28, marginBottom: 12 }}>✅</div>
@@ -232,7 +232,14 @@ export default function Landing({ onStart }) {
 
       {/* FOOTER */}
       <footer style={{ borderTop: `1px solid ${C.border}`, padding: "32px 24px", textAlign: "center", color: C.muted, fontSize: 13 }}>
-        <div>© {new Date().getFullYear()} webodai. · Vytvořil Tomáš · <a href="mailto:tomyscz1@gmail.com" style={{ color: C.muted }}>tomyscz1@gmail.com</a></div>
+        <div style={{ marginBottom: 8 }}>© {new Date().getFullYear()} webodai. · Tomáš Plášek · IČO 14090759</div>
+        <div style={{ display: "flex", justifyContent: "center", gap: 16, flexWrap: "wrap" }}>
+          <a href="mailto:tomyscz1@gmail.com" style={{ color: C.muted }}>tomyscz1@gmail.com</a>
+          <span>·</span>
+          <a href="#" style={{ color: C.muted, opacity: 0.6 }}>Obchodní podmínky (připravujeme)</a>
+          <span>·</span>
+          <a href="#" style={{ color: C.muted, opacity: 0.6 }}>Ochrana osobních údajů (připravujeme)</a>
+        </div>
       </footer>
     </div>
   );
