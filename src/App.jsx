@@ -673,7 +673,7 @@ NAVIGACE (sticky)
 HERO (id="home", min-height: 92vh)
 - Layout 2 sloupce na desktopu (60% text vlevo, 40% vizuál vpravo)
 - Levý sloupec:
-  • Kicker text nahoře (uppercase, ${f.palette.primary}, 13px, letter-spacing 0.1em) — vymysli pro obor
+  • MALÝ kicker badge NAHOŘE nad H1 (KRITICKÉ: max font-size 13px, padding 6px 14px, uppercase, color: ${f.palette.primary}, background: ${f.palette.primary}15, border-radius 100px, letter-spacing 0.1em, display: inline-block, marginBottom: 24px) — vymysli krátký 3–5 slov text pro obor (např. "Profesionální péče o nehty"). NESMÍ být velký nadpis, je to JEN MALÝ ŠTÍTEK!
   • H1 = SILNÝ HEADLINE (NE jen název firmy!) — benefit věta specifická pro obor "${f.industry}"
   • Podtitulek 18-20px, 2 řádky max
   • 2 buttony: primární "Nezávazná poptávka" (#kontakt), sekundární outline "Naše služby" (#sluzby)
@@ -811,8 +811,8 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
           "anthropic-version": "2023-06-01",
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 8000,
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 16000,
           messages: [{ role: "user", content: prompt }],
         }),
       });
@@ -823,6 +823,13 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
       if (!data.content) { alert("API chyba: " + JSON.stringify(data).slice(0, 300)); setLoading(false); return; }
       let raw = data.content.map(b => b.text || "").join("");
       raw = raw.replace(/^```html?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
+
+      // Kontrola — pokud generování nedokončilo, neúčtujeme pokus
+      if (!raw.includes("</html>") || raw.length < 3000) {
+        alert("Generování se nedokončilo (web je nekompletní). Zkuste to prosím znovu — tento pokus se vám nezapočítá.");
+        setLoading(false);
+        return;
+      }
 
       // Nahradit placeholdery skutečnými obrázky (base64)
       if (f.heroImage) raw = raw.replace(/\{\{HERO_IMAGE\}\}/g, f.heroImage);
@@ -846,9 +853,16 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
 
   return (
     <div style={{ background: C.bg, minHeight: "100vh", color: C.text, fontFamily: "-apple-system,'Segoe UI',sans-serif", paddingBottom: 60 }}>
-      <div style={{ padding: "22px 24px 18px", textAlign: "center", borderBottom: `1px solid ${C.border}`, marginBottom: 24 }}>
-        <div style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-1px", marginBottom: 4 }}>webodai<span style={{ color: C.accent }}>.</span></div>
-        <p style={{ color: C.muted, fontSize: 13, margin: 0 }}>Profesionální web za pár minut · Jednorázová platba 2 000 Kč</p>
+      <div style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(8,8,16,0.85)", backdropFilter: "blur(12px)", borderBottom: `1px solid ${C.border}`, marginBottom: 24 }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 24px" }}>
+          <div onClick={() => setStarted(false)} style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-0.5px", cursor: "pointer" }}>
+            webodai<span style={{ color: C.accent }}>.</span>
+          </div>
+          <button onClick={() => setStarted(false)} style={{ ...btnB, padding: "8px 16px", fontSize: 13 }}>← Zpět na úvod</button>
+        </div>
+      </div>
+      <div style={{ textAlign: "center", margin: "0 auto 22px", padding: "0 24px", maxWidth: 720 }}>
+        <p style={{ color: C.muted, fontSize: 13, margin: 0 }}>Vyplňte formulář a AI vygeneruje váš profesionální web. Trvá to 5 minut.</p>
       </div>
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 0, marginBottom: 22, padding: "0 12px", flexWrap: "wrap" }}>
         {STEPS.map((s, i) => (
