@@ -711,9 +711,23 @@ GALERIE (id="galerie")
 - Pozadí ${f.palette.bg}, padding 100px 0
 - H2 "Naše práce" + podnadpis
 - Mřížka 3x2 (6 dlaždic), aspect-ratio 4:3, gap 16px, border-radius 12px overflow:hidden
-${galleryCount > 0 ? `- Prvních ${galleryCount} dlaždic použij <img src="{{GALLERY_N}}" alt="Práce N" style="width:100%;height:100%;object-fit:cover">` : ""}
-${galleryCount < 6 ? `- ${galleryCount === 0 ? "Všech 6" : `Zbývajících ${6 - galleryCount}`} dlaždic: linear-gradient ze 2 šedých odstínů + emoji 📷 + text "Vaše práce"` : ""}
-- Hover: scale(1.03) + překryvný overlay v ${f.palette.primary} s 20% průhlednosti
+${galleryCount > 0 ? `- Prvních ${galleryCount} dlaždic použij <img src="{{GALLERY_N}}" alt="Práce N" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in" onclick="openLightbox(this.src)">` : ""}
+${galleryCount < 6 ? `- ${galleryCount === 0 ? "Všech 6" : `Zbývajících ${6 - galleryCount}`} dlaždic: linear-gradient ze 2 šedých odstínů + emoji 📷 + text "Vaše práce" (BEZ lightbox - jen placeholder)` : ""}
+- Hover na obrázek: scale(1.03) + překryvný overlay v ${f.palette.primary} s 20% průhlednosti
+
+LIGHTBOX (vlož na konec <body> pokud galleryCount > 0):
+${galleryCount > 0 ? `
+  <div id="lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:998;align-items:center;justify-content:center;cursor:zoom-out;padding:20px" onclick="if(event.target===this||event.target.tagName==='IMG')closeLightbox()">
+    <img id="lightbox-img" alt="" style="max-width:92vw;max-height:90vh;object-fit:contain;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,0.5)">
+    <button onclick="closeLightbox()" aria-label="Zavřít" style="position:absolute;top:20px;right:24px;width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,0.15);color:white;cursor:pointer;font-size:24px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)">×</button>
+  </div>
+  <script>
+    function openLightbox(src){document.getElementById('lightbox-img').src=src;document.getElementById('lightbox').style.display='flex'}
+    function closeLightbox(){document.getElementById('lightbox').style.display='none'}
+  </script>
+- ESC klávesa zavře lightbox + GDPR modal — kombinuj v jednom keydown listeneru:
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeLightbox();document.getElementById('gdpr-modal').style.display='none'}})
+` : "(Bez nahraných fotek lightbox není potřeba)"}
 
 ${reviews.length ? `RECENZE (id="recenze")
 - Bílé pozadí, padding 100px 0
@@ -731,20 +745,21 @@ KONTAKT (id="kontakt")
   • Kicker "Pojďme to probrat" (uppercase, opacity 0.7)
   • H2 "Kontaktujte nás" v bílé
   • Podtitulek 2 řádky
-  • 4 řádky info s ikonami:
+  • 3 řádky info s ikonami (NEpřidávej pracovní dobu — uvádějte JEN to co je v zadání):
     📞 ${f.phone}
     ✉️ ${f.email}
     📍 ${f.address}, ${f.city}
-    🕐 Po-Pá: 8:00-17:00
   • Pod info přidej Google Maps iframe:
     <iframe src="${mapsUrl}" width="100%" height="280" style="border:0;border-radius:16px;margin-top:24px;filter:grayscale(0.2)" allowfullscreen loading="lazy"></iframe>
 - Pravý sloupec — formulář v BÍLÉ kartě:
   • padding 40px, border-radius 20px
   • Pole: Vaše jméno, Email, Telefon (volitelné), Předmět, Vaše zpráva (textarea 4 řádky)
   • Inputs: padding 14px, border 1px solid #e5e5e5, border-radius 10px, font-size 16px
-  • Pod polem zpráva GDPR checkbox: <label style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#666;margin-top:8px"><input type="checkbox" name="gdpr" required style="margin-top:3px"><span>Souhlasím se <a href="#gdpr" style="color:${f.palette.primary}">zpracováním osobních údajů</a>.</span></label>
+  • HONEYPOT (anti-spam): přidej skryté pole <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;opacity:0;pointer-events:none" aria-hidden="true">
+  • Pod polem zpráva GDPR checkbox: <label style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#666;margin-top:8px"><input type="checkbox" name="gdpr" required style="margin-top:3px"><span>Souhlasím se <a href="#" onclick="document.getElementById('gdpr-modal').style.display='flex';return false" style="color:${f.palette.primary}">zpracováním osobních údajů</a>.</span></label>
   • Submit button v ${f.palette.primary}, full-width, padding 16px, font-size 17px, weight 700
-  • Form: <form action="mailto:${f.email}" method="post" enctype="text/plain">
+  • Form: <form action="mailto:${f.email}" method="post" enctype="text/plain" onsubmit="return !this.website.value">
+  • Onsubmit blokuje odeslání pokud je honeypot vyplněn (boti)
 
 GDPR — JAKO MODAL POPUP (NE SAMOSTATNÁ SEKCE!)
 - NEVKLÁDEJ GDPR jako sekci na stránce
