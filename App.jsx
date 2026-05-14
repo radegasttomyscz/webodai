@@ -68,6 +68,25 @@ function StepFirma({ f, upd }) {
         </div>
         <div><label style={lbl}>Popis firmy *</label><textarea style={{ ...inp, height: 100, resize: "vertical" }} placeholder="Pár vět o vaší firmě — co děláte, kde působíte, čím se odlišujete..." value={f.description} onChange={e => upd("description", e.target.value)} /></div>
         <div><label style={lbl}>Rok založení (volitelné)</label><input style={inp} placeholder="např. 2005" value={f.founded} onChange={e => upd("founded", e.target.value)} /></div>
+        <div>
+          <label style={lbl}>Důvěryhodnost (volitelné, max 3 body)</label>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {[0, 1, 2].map(i => (
+              <input
+                key={i}
+                style={inp}
+                placeholder={i === 0 ? "např. 15 let na trhu" : i === 1 ? "např. Přes 200 spokojených klientů" : "např. Garance kvality"}
+                value={f.trustPoints[i] || ""}
+                onChange={e => {
+                  const arr = [...f.trustPoints];
+                  arr[i] = e.target.value;
+                  upd("trustPoints", arr);
+                }}
+              />
+            ))}
+          </div>
+          <div style={{ fontSize: 12, color: C.muted, marginTop: 6 }}>Tyto body se zobrazí pod hlavním nadpisem jako ✓ tvrzení. Pokud nevyplníte, nic se nezobrazí.</div>
+        </div>
       </div>
     </div>
   );
@@ -505,6 +524,7 @@ export default function App() {
   const [f, setF] = useState({
     companyName: "", ico: "", industry: "", description: "", founded: "",
     services: ["", "", ""],
+    trustPoints: ["", "", ""],
     phone: "", email: "", address: "", city: "",
     facebook: "", instagram: "", linkedin: "",
     reviews: [],
@@ -531,6 +551,7 @@ export default function App() {
     try {
       const services = f.services.filter(s => s.trim());
       const reviews = f.reviews.filter(r => r.text.trim());
+      const trustList = f.trustPoints.filter(s => s.trim());
       const galleryUploaded = f.gallery.filter(Boolean);
       const galleryCount = galleryUploaded.length;
       const hasHero = !!f.heroImage;
@@ -570,9 +591,8 @@ Krémové/světlé pozadí: ${f.palette.bg}
 ${hasLogo ? `LOGO: Klient nahrál vlastní logo → V navigaci a footeru použij <img src="{{LOGO}}" alt="${f.companyName}" style="height:42px;width:auto;object-fit:contain"> místo textového loga.` : "LOGO: NEnahráno → V navigaci a footeru použij stylový textový název firmy v hlavním fontu, weight 800."}
 ${hasHero ? `HERO FOTKA: Klient nahrál hero fotku → V hero sekci v pravém sloupci místo CSS dekorativního prvku použij <img src="{{HERO_IMAGE}}" alt="${f.companyName}" style="width:100%;height:600px;object-fit:cover;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.15)">` : "HERO FOTKA: NEnahrána → V hero sekci v pravém sloupci použij CSS dekorativní prvek dle DESIGN DNA oboru (gradient s geometrickými tvary)."}
 GALERIE: Klient nahrál ${galleryCount} fotek z 6.
-${galleryCount > 0 ? `→ Pro nahrané použij <img src="{{GALLERY_N}}" alt="Práce N" style="width:100%;height:100%;object-fit:cover"> kde N je 1 až ${galleryCount}` : ""}
-${galleryCount === 0 ? "→ Pro celou galerii použij 6 šedých CSS placeholderů s textem 📷 Vaše práce" : ""}
-${galleryCount > 0 && galleryCount < 6 ? `→ Zbývajících ${6 - galleryCount} dlaždic vyplň šedými CSS placeholdery s textem 📷 Vaše práce` : ""}
+${galleryCount > 0 ? `→ Zobraz POUZE ${galleryCount} dlaždic se skutečnými fotkami (NIKDY nepřidávej prázdné šedé placeholdery!). Použij <img src="{{GALLERY_N}}" alt="Práce N" style="width:100%;height:100%;object-fit:cover"> kde N je 1 až ${galleryCount}` : ""}
+${galleryCount === 0 ? "→ Klient nenahrál žádné fotky → pro galerii použij 6 šedých CSS placeholderů s textem 📷 Vaše práce" : ""}
 
 ═══ KROK 1: ANALYZUJ OBOR — TOTO JE NEJDŮLEŽITĚJŠÍ ═══
 
@@ -664,7 +684,9 @@ BAREVNÉ POUŽITÍ
 ═══ KROK 3: STRUKTURA ═══
 
 NAVIGACE (sticky)
-- Na začátku průhledná, při scrollu solid white s subtle shadow
+- KRITICKÉ: VŽDY solid white background #ffffff s box-shadow: 0 2px 12px rgba(0,0,0,0.06) — NIKDY průhledná, ŽÁDNÉ změny barev při scrollu!
+- Text v navigaci VŽDY tmavý: logo color #0f0f0f, menu items color #444. NEMĚŇ barvy nikdy.
+- Padding 16px 0, sticky top:0, z-index:100
 - ${hasLogo ? "Logo vlevo (img tag s {{LOGO}})" : "Logo vlevo = název firmy v hlavním fontu, weight 800"}
 - Menu: Domů · O nás · Služby · Jak to probíhá · Galerie${reviews.length ? " · Recenze" : ""} · Kontakt
 - Vpravo malé CTA "Poptávka" (#kontakt)
@@ -677,7 +699,7 @@ HERO (id="home", min-height: 92vh)
   • H1 = SILNÝ HEADLINE (NE jen název firmy!) — benefit věta specifická pro obor "${f.industry}"
   • Podtitulek 18-20px, 2 řádky max
   • 2 buttony: primární "Nezávazná poptávka" (#kontakt), sekundární outline "Naše služby" (#sluzby)
-  • Pod buttony 3 trust elementy s ikonkou ✓ (zkušenosti, počet realizací, garance...)
+  • Pod buttony ${trustList.length > 0 ? `${trustList.length} trust elementy s ikonkou ✓ — POUŽIJ PŘESNĚ TYTO TEXTY, NIC NEVYMÝŠLEJ:\n${trustList.map(t => `    ✓ ${t}`).join("\n")}` : "NEZOBRAZUJ žádné trust elementy ani ✓ tvrzení — klient žádné neuvedl"}
 - Pravý sloupec:
   ${hasHero ? "• Použij <img src='{{HERO_IMAGE}}' alt='${f.companyName}' style='width:100%;height:600px;object-fit:cover;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.15)'>" : "• CSS pattern dle DESIGN DNA oboru: gradient + geometrické tvary, border-radius 24px, výška 500-600px"}
 
@@ -712,9 +734,8 @@ JAK TO PROBÍHÁ (id="proces")
 GALERIE (id="galerie")
 - Pozadí ${f.palette.bg}, padding 100px 0
 - H2 "Naše práce" + podnadpis
-- Mřížka 3x2 (6 dlaždic), aspect-ratio 4:3, gap 16px, border-radius 12px overflow:hidden
-${galleryCount > 0 ? `- Prvních ${galleryCount} dlaždic použij <img src="{{GALLERY_N}}" alt="Práce N" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in" onclick="openLightbox(this.src)">` : ""}
-${galleryCount < 6 ? `- ${galleryCount === 0 ? "Všech 6" : `Zbývajících ${6 - galleryCount}`} dlaždic: linear-gradient ze 2 šedých odstínů + emoji 📷 + text "Vaše práce" (BEZ lightbox - jen placeholder)` : ""}
+- Mřížka grid s ${galleryCount === 0 ? 6 : galleryCount} dlaždicemi: grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)), gap 16px, border-radius 12px overflow:hidden, aspect-ratio 4:3
+${galleryCount === 0 ? `- Klient nenahrál žádné fotky → zobraz 6 šedých placeholderů: linear-gradient ze 2 šedých odstínů + emoji 📷 + text "Vaše práce" (BEZ lightboxu)` : `- Zobraz POUZE ${galleryCount} dlaždic se skutečnými fotkami:\n${Array.from({length: galleryCount}, (_, i) => `  Dlaždice ${i+1}: <img src="{{GALLERY_${i+1}}}" alt="Práce ${i+1}" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in" onclick="openLightbox(this.src)">`).join("\n")}\n  NEPŘIDÁVEJ ŽÁDNÉ DALŠÍ PRÁZDNÉ ŠEDÉ DLAŽDICE!`}
 - Hover na obrázek: scale(1.03) + překryvný overlay v ${f.palette.primary} s 20% průhlednosti
 
 LIGHTBOX (vlož na konec <body> pokud galleryCount > 0):
