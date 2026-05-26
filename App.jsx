@@ -10,7 +10,7 @@ const PALETTES = [
   { id: "burgundy", name: "Vínová",   primary: "#7f1d1d", accent: "#b91c1c", bg: "#fef2f2" },
   { id: "white",    name: "Bílá",     primary: "#18181b", accent: "#52525b", bg: "#ffffff" },
 ];
-const STEPS = ["Firma", "Služby", "Fotky", "Kontakt", "Recenze", "Barvy", "Shrnutí"];
+const STEPS = ["Firma", "Služby", "Postup", "Fotky", "Kontakt", "Recenze", "Barvy", "Shrnutí"];
 const C = {
   bg: "#080810", card: "#0f0f1a", card2: "#13131f",
   border: "#1e1e30", accent: "#f97316", text: "#e2e8f0",
@@ -67,6 +67,11 @@ function StepFirma({ f, upd }) {
           <div style={{ fontSize: 12, color: C.muted, marginTop: 6 }}>Důležité — podle oboru se přizpůsobí obsah i vzhled vašeho webu</div>
         </div>
         <div><label style={lbl}>Popis firmy *</label><textarea style={{ ...inp, height: 100, resize: "vertical" }} placeholder="Pár vět o vaší firmě — co děláte, kde působíte, čím se odlišujete..." value={f.description} onChange={e => upd("description", e.target.value)} /></div>
+        <div>
+          <label style={lbl}>Hlavní slogan na webu (volitelné)</label>
+          <input style={inp} placeholder='např. "Voda v domě bez starostí, 24/7"' value={f.heroHeadline} onChange={e => upd("heroHeadline", e.target.value)} />
+          <div style={{ fontSize: 12, color: C.muted, marginTop: 6 }}>Hlavní nadpis v horní části webu. Pokud nevyplníte, AI ho vymyslí podle oboru.</div>
+        </div>
         <div><label style={lbl}>Rok založení (volitelné)</label><input style={inp} placeholder="např. 2005" value={f.founded} onChange={e => upd("founded", e.target.value)} /></div>
         <div>
           <label style={lbl}>Důvěryhodnost (volitelné, max 3 body)</label>
@@ -93,18 +98,24 @@ function StepFirma({ f, upd }) {
 }
 
 function StepSluzby({ f, upd }) {
-  const add = () => upd("services", [...f.services, ""]);
+  const add = () => upd("services", [...f.services, { name: "", desc: "" }]);
   const del = i => upd("services", f.services.filter((_, j) => j !== i));
-  const set = (i, v) => { const s = [...f.services]; s[i] = v; upd("services", s); };
+  const setField = (i, k, v) => { const s = [...f.services]; s[i] = { ...s[i], [k]: v }; upd("services", s); };
   return (
     <div>
       <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 700, color: C.text }}>Vaše služby</h2>
-      <p style={{ color: C.muted, fontSize: 14, margin: "0 0 24px" }}>Co nabízíte zákazníkům?</p>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <p style={{ color: C.muted, fontSize: 14, margin: "0 0 24px" }}>Co nabízíte zákazníkům? Popis u každé služby je volitelný — pokud ho nevyplníte, AI ho doplní.</p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {f.services.map((s, i) => (
-          <div key={i} style={{ display: "flex", gap: 8 }}>
-            <input style={{ ...inp, flex: 1 }} placeholder="např. Výroba nábytku na míru" value={s} onChange={e => set(i, e.target.value)} />
-            {f.services.length > 1 && <button onClick={() => del(i)} style={{ background: "none", border: `1px solid ${C.border}`, color: C.muted, borderRadius: 10, width: 44, cursor: "pointer", fontSize: 20, flexShrink: 0 }}>×</button>}
+          <div key={i} style={{ background: C.input, border: `1px solid ${C.border}`, borderRadius: 12, padding: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+              <span style={{ color: C.muted, fontSize: 12, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>Služba {i + 1}</span>
+              {f.services.length > 1 && <button onClick={() => del(i)} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", fontSize: 18, padding: 0 }}>×</button>}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <input style={inp} placeholder="Název služby (např. Výroba nábytku na míru)" value={s.name} onChange={e => setField(i, "name", e.target.value)} />
+              <textarea style={{ ...inp, height: 60, resize: "vertical", fontSize: 14 }} placeholder="Popis služby (volitelné, 1-2 věty)" value={s.desc} onChange={e => setField(i, "desc", e.target.value)} />
+            </div>
           </div>
         ))}
         <button onClick={add} style={{ border: `1px dashed ${C.border}`, background: "none", color: C.muted, borderRadius: 10, padding: 12, cursor: "pointer", fontSize: 14 }}>+ Přidat službu</button>
@@ -112,6 +123,38 @@ function StepSluzby({ f, upd }) {
     </div>
   );
 }
+
+function StepPostup({ f, upd }) {
+  const setField = (i, k, v) => {
+    const arr = [...f.processSteps];
+    arr[i] = { ...arr[i], [k]: v };
+    upd("processSteps", arr);
+  };
+  return (
+    <div>
+      <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 700, color: C.text }}>Jak u vás probíhá spolupráce</h2>
+      <p style={{ color: C.muted, fontSize: 14, margin: "0 0 24px" }}>4 vlastní kroky — od první poptávky po předání. Krok celé vynechte, pokud nechcete sekci na webu.</p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {f.processSteps.map((s, i) => (
+          <div key={i} style={{ background: C.input, border: `1px solid ${C.border}`, borderRadius: 12, padding: 14 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+              <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.accent, color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 13, flexShrink: 0 }}>{i + 1}</div>
+              <span style={{ color: C.muted, fontSize: 12, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>Krok {i + 1}</span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <input style={inp} placeholder={i === 0 ? "Název (např. Nezávazná poptávka)" : i === 1 ? "Název (např. Konzultace)" : i === 2 ? "Název (např. Realizace)" : "Název (např. Předání a záruka)"} value={s.title} onChange={e => setField(i, "title", e.target.value)} />
+              <textarea style={{ ...inp, height: 60, resize: "vertical", fontSize: 14 }} placeholder="Krátký popis kroku (volitelné, 1-2 věty)" value={s.desc} onChange={e => setField(i, "desc", e.target.value)} />
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={{ marginTop: 14, padding: "10px 14px", background: C.input, borderRadius: 8, border: `1px solid ${C.border}`, fontSize: 12, color: C.muted, lineHeight: 1.5 }}>
+        ℹ️ Sekce "Jak to probíhá" se na webu zobrazí, <strong style={{ color: C.text }}>pouze pokud vyplníte název u všech 4 kroků</strong>. Jinak se sekce přeskočí.
+      </div>
+    </div>
+  );
+}
+
 
 function StepFotky({ f, upd }) {
   const [busy, setBusy] = useState(null);
@@ -291,6 +334,16 @@ function StepKontakt({ f, upd }) {
         ].map(({ l, key, ph, type }) => (
           <div key={key}><label style={lbl}>{l}</label><input style={inp} type={type || "text"} placeholder={ph} value={f[key]} onChange={e => upd(key, e.target.value)} /></div>
         ))}
+        <div>
+          <label style={lbl}>Kontaktní osoba (volitelné)</label>
+          <input style={inp} placeholder="např. Jan Novák" value={f.contactPerson} onChange={e => upd("contactPerson", e.target.value)} />
+          <div style={{ fontSize: 12, color: C.muted, marginTop: 6 }}>Jméno majitele nebo zodpovědné osoby. Zobrazí se v kontaktní sekci pokud vyplníte.</div>
+        </div>
+        <div>
+          <label style={lbl}>Pracovní doba (volitelné)</label>
+          <input style={inp} placeholder="např. Po-Pá: 8:00-17:00, So: 9:00-12:00" value={f.openingHours} onChange={e => upd("openingHours", e.target.value)} />
+          <div style={{ fontSize: 12, color: C.muted, marginTop: 6 }}>Pokud nevyplníte, na webu se nezobrazí (AI ji nevymyslí).</div>
+        </div>
 
         <div style={{ paddingTop: 8, borderTop: `1px solid ${C.border}` }}>
           <label style={{ ...lbl, marginTop: 14 }}>Sociální sítě (volitelné)</label>
@@ -394,10 +447,11 @@ function StepBarvy({ f, upd }) {
 }
 
 function StepShrnutí({ f, onPay }) {
-  const services = f.services.filter(s => s.trim());
+  const services = f.services.filter(s => s.name.trim());
   const reviews  = f.reviews.filter(r => r.text.trim());
   const galleryCount = f.gallery.filter(Boolean).length;
   const socialList = [f.facebook && "FB", f.instagram && "IG", f.linkedin && "IN"].filter(Boolean).join(", ");
+  const processCount = f.processSteps.filter(s => s.title.trim()).length;
   const Row = ({ label, val }) => val ? (
     <div style={{ display: "flex", gap: 12, padding: "8px 0", borderBottom: `1px solid ${C.border}` }}>
       <span style={{ color: C.muted, fontSize: 13, minWidth: 100 }}>{label}</span>
@@ -409,20 +463,24 @@ function StepShrnutí({ f, onPay }) {
       <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 700, color: C.text }}>Shrnutí objednávky</h2>
       <p style={{ color: C.muted, fontSize: 14, margin: "0 0 22px" }}>Zkontrolujte údaje před platbou</p>
       <div style={{ background: C.input, borderRadius: 12, padding: 16, border: `1px solid ${C.border}`, marginBottom: 18 }}>
-        <Row label="Firma"   val={f.companyName} />
-        <Row label="IČO"     val={f.ico} />
-        <Row label="Obor"    val={f.industry} />
-        <Row label="Tel."    val={f.phone} />
-        <Row label="Email"   val={f.email} />
-        <Row label="Adresa"  val={[f.address, f.city].filter(Boolean).join(", ")} />
-        <Row label="Sítě"    val={socialList || "—"} />
-        <Row label="Služby"  val={services.join(", ")} />
-        <Row label="Hero"    val={f.heroImage ? "✓ Nahráno" : "—"} />
-        <Row label="Galerie" val={galleryCount > 0 ? `${galleryCount}× foto` : "—"} />
-        <Row label="Logo"    val={f.logo ? "✓ Nahráno" : "—"} />
-        <Row label="Recenze" val={reviews.length ? `${reviews.length}×` : "žádné"} />
-        <Row label="Barva"   val={f.palette.name} />
-        <Row label="GDPR"    val={f.gdprMode === "auto" ? "Automaticky" : "Vlastní text"} />
+        <Row label="Firma"     val={f.companyName} />
+        <Row label="IČO"       val={f.ico} />
+        <Row label="Obor"      val={f.industry} />
+        <Row label="Slogan"    val={f.heroHeadline || "AI vymyslí"} />
+        <Row label="Kontakt"   val={f.contactPerson || "—"} />
+        <Row label="Tel."      val={f.phone} />
+        <Row label="Email"     val={f.email} />
+        <Row label="Adresa"    val={[f.address, f.city].filter(Boolean).join(", ")} />
+        <Row label="Hodiny"    val={f.openingHours || "—"} />
+        <Row label="Sítě"      val={socialList || "—"} />
+        <Row label="Služby"    val={services.map(s => s.name).join(", ")} />
+        <Row label="Postup"    val={processCount === 4 ? "✓ 4 vlastní kroky" : "Sekci vynechat"} />
+        <Row label="Hero foto" val={f.heroImage ? "✓ Nahráno" : "—"} />
+        <Row label="Galerie"   val={galleryCount > 0 ? `${galleryCount}× foto` : "—"} />
+        <Row label="Logo"      val={f.logo ? "✓ Nahráno" : "—"} />
+        <Row label="Recenze"   val={reviews.length ? `${reviews.length}×` : "žádné"} />
+        <Row label="Barva"     val={f.palette.name} />
+        <Row label="GDPR"      val={f.gdprMode === "auto" ? "Automaticky" : "Vlastní text"} />
       </div>
       <div style={{ background: "#091a0f", border: `1px solid ${C.success}40`, borderRadius: 12, padding: 18, marginBottom: 18 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
@@ -523,9 +581,12 @@ export default function App() {
   const [genCount, setGenCount] = useState(0);
   const [f, setF] = useState({
     companyName: "", ico: "", industry: "", description: "", founded: "",
-    services: ["", "", ""],
+    heroHeadline: "",
+    services: [{ name: "", desc: "" }, { name: "", desc: "" }, { name: "", desc: "" }],
     trustPoints: ["", "", ""],
+    processSteps: [{ title: "", desc: "" }, { title: "", desc: "" }, { title: "", desc: "" }, { title: "", desc: "" }],
     phone: "", email: "", address: "", city: "",
+    contactPerson: "", openingHours: "",
     facebook: "", instagram: "", linkedin: "",
     reviews: [],
     palette: PALETTES[0],
@@ -549,9 +610,11 @@ export default function App() {
     }
     setLoading(true);
     try {
-      const services = f.services.filter(s => s.trim());
+      const services = f.services.filter(s => s.name.trim());
       const reviews = f.reviews.filter(r => r.text.trim());
       const trustList = f.trustPoints.filter(s => s.trim());
+      const processFilled = f.processSteps.filter(s => s.title.trim());
+      const hasProcess = processFilled.length === 4;
       const galleryUploaded = f.gallery.filter(Boolean);
       const galleryCount = galleryUploaded.length;
       const hasHero = !!f.heroImage;
@@ -572,17 +635,35 @@ export default function App() {
 
 VRAŤ POUZE čistý HTML kód začínající <!DOCTYPE html>. Bez markdown, bez komentářů mimo HTML.
 
+═══ KRITICKÁ PRAVIDLA — POROZUMĚJ DŘÍVE NEŽ GENERUJEŠ ═══
+1. NIKDY si nevymýšlej faktické údaje které nejsou v zadání: počty zákazníků, roky existence (pokud není v "Působí od"), pracovní dobu, ceny, certifikace, ocenění, jména zaměstnanců, lokality navíc.
+2. Pokud je nějaká informace označena "NEZADÁNO" nebo "NEZOBRAZUJ" — opravdu ji vynech, neimprovizuj náhradu.
+3. Pokud je text označen "POUŽIJ PŘESNĚ" — vlož ho přesně tak jak je, neparafrázuj.
+4. Marketingové texty (proč my, benefity služeb) které nejsou zadané MŮŽEŠ vymýšlet — ale obecně, bez konkrétních čísel, dat či faktů. "Kvalitní řemeslná práce" ANO. "Více než 100 spokojených zákazníků" NE (pokud to není v zadání).
+5. Pokud klient nezadal kontaktní osobu, recenze, pracovní dobu, postup — tyto sekce/řádky NEZOBRAZUJ.
+
 ═══ FIRMA ═══
 Název: ${f.companyName}
 IČO: ${f.ico}
 Obor: ${f.industry}
 Popis od majitele: ${f.description}
 ${f.founded ? `Působí od: ${f.founded}` : ""}
-Služby: ${services.join(" · ")}
+${f.contactPerson ? `Kontaktní osoba: ${f.contactPerson}` : ""}
+${f.heroHeadline ? `HLAVNÍ SLOGAN (POUŽIJ PŘESNĚ TENTO TEXT JAKO H1 V HERO): "${f.heroHeadline}"` : `HLAVNÍ SLOGAN: NEZADÁN — vymysli silnou benefit větu jako H1 pro obor "${f.industry}"`}
+
+SLUŽBY (POUŽIJ PŘESNĚ TYTO NÁZVY, NIC NEVYMÝŠLEJ NAVÍC!):
+${services.map((s, i) => `${i+1}. ${s.name}${s.desc.trim() ? `\n   Popis (POUŽIJ PŘESNĚ): "${s.desc}"` : `\n   Popis: NEZADÁN — vymysli 1-2 věty popisu specifické pro tuto službu v oboru "${f.industry}"`}`).join("\n")}
+
+Kontakt — POUŽIJ POUZE TYTO ÚDAJE, NIC NEVYMÝŠLEJ:
 Telefon: ${f.phone}
 Email: ${f.email}
 Adresa: ${f.address}, ${f.city}
-${reviews.length ? `Recenze:\n${reviews.map(r => `- ${r.stars}★ "${r.text}" — ${r.name}`).join("\n")}` : ""}
+${f.openingHours ? `Pracovní doba: ${f.openingHours}` : "Pracovní doba: NEZADÁNA — NEZOBRAZUJ na webu, nic nevymýšlej!"}
+${reviews.length ? `Recenze:\n${reviews.map(r => `- ${r.stars}★ "${r.text}" — ${r.name}`).join("\n")}` : "Recenze: nezadány — sekci recenzí NEZOBRAZUJ"}
+
+POSTUP (Jak to probíhá):
+${hasProcess ? `POUŽIJ PŘESNĚ TYTO 4 KROKY (NEVYMÝŠLEJ JINÉ NÁZVY):\n${processFilled.map((s, i) => `${i+1}. ${s.title}${s.desc.trim() ? ` — popis: "${s.desc}"` : ` (popis vymysli 1-2 věty)`}`).join("\n")}` : "POSTUP NEZADÁN — sekci 'Jak to probíhá' NEZOBRAZUJ na webu (přeskoč ji úplně, NEVYMÝŠLEJ vlastní kroky)"}
+
 Primární barva: ${f.palette.primary}
 Akcentová barva: ${f.palette.accent}
 Krémové/světlé pozadí: ${f.palette.bg}
@@ -688,7 +769,7 @@ NAVIGACE (sticky)
 - Text v navigaci VŽDY tmavý: logo color #0f0f0f, menu items color #444. NEMĚŇ barvy nikdy.
 - Padding 16px 0, sticky top:0, z-index:100
 - ${hasLogo ? "Logo vlevo (img tag s {{LOGO}})" : "Logo vlevo = název firmy v hlavním fontu, weight 800"}
-- Menu: Domů · O nás · Služby · Jak to probíhá · Galerie${reviews.length ? " · Recenze" : ""} · Kontakt
+- Menu: Domů · O nás · Služby${hasProcess ? " · Jak to probíhá" : ""}${galleryCount > 0 ? " · Galerie" : ""}${reviews.length ? " · Recenze" : ""} · Kontakt
 - Vpravo malé CTA "Poptávka" (#kontakt)
 - Mobile: hamburger animovaný do plnoobrazovkového menu
 
@@ -696,7 +777,7 @@ HERO (id="home", min-height: 92vh)
 - Layout 2 sloupce na desktopu (60% text vlevo, 40% vizuál vpravo)
 - Levý sloupec:
   • MALÝ kicker badge NAHOŘE nad H1 (KRITICKÉ: max font-size 13px, padding 6px 14px, uppercase, color: ${f.palette.primary}, background: ${f.palette.primary}15, border-radius 100px, letter-spacing 0.1em, display: inline-block, marginBottom: 24px) — vymysli krátký 3–5 slov text pro obor (např. "Profesionální péče o nehty"). NESMÍ být velký nadpis, je to JEN MALÝ ŠTÍTEK!
-  • H1 = SILNÝ HEADLINE (NE jen název firmy!) — benefit věta specifická pro obor "${f.industry}"
+  • H1 = ${f.heroHeadline ? `POUŽIJ PŘESNĚ TENTO TEXT: "${f.heroHeadline}"` : `SILNÝ HEADLINE (NE jen název firmy!) — benefit věta specifická pro obor "${f.industry}"`}
   • Podtitulek 18-20px, 2 řádky max
   • 2 buttony: primární "Nezávazná poptávka" (#kontakt), sekundární outline "Naše služby" (#sluzby)
   • Pod buttony ${trustList.length > 0 ? `${trustList.length} trust elementy s ikonkou ✓ — POUŽIJ PŘESNĚ TYTO TEXTY, NIC NEVYMÝŠLEJ:\n${trustList.map(t => `    ✓ ${t}`).join("\n")}` : "NEZOBRAZUJ žádné trust elementy ani ✓ tvrzení — klient žádné neuvedl"}
@@ -719,17 +800,19 @@ SLUŽBY (id="sluzby")
 - Karta: bílé pozadí, padding 32px, border-radius 16px
   • Velká emoji ikona z DESIGN DNA vlevo nahoře
   • Nadpis služby (20px weight 700)
-  • 2-3 věty konkrétního popisu
+  • Popis služby
   • Šipka → vpravo dole
 - Hover: translateY(-6px), prohloubený stín
-- Služby: ${services.join(", ")}
+- Služby (POUŽIJ POUZE TYTO, NIC NAVÍC):
+${services.map((s, i) => `  Karta ${i+1}: Název = "${s.name}", Popis = ${s.desc.trim() ? `"${s.desc}"` : `(vymysli 1-2 věty specifické pro tuto službu)`}`).join("\n")}
 
-JAK TO PROBÍHÁ (id="proces")
+${hasProcess ? `JAK TO PROBÍHÁ (id="proces")
 - Bílé pozadí, padding 100px 0
-- H2 "Jak u nás probíhá spolupráce" + podnadpis
+- H2 "Jak u nás probíhá spolupráce" + krátký podnadpis
 - 4 horizontální kroky (mobil vertikálně), spojené tenkou linkou
 - Krok: velké číslo v kruhu (1,2,3,4) v ${f.palette.primary}, nadpis kroku, krátký popis
-- Vymysli 4 logické kroky specifické pro obor
+- POUŽIJ PŘESNĚ TYTO 4 KROKY (klient je zadal):
+${processFilled.map((s, i) => `  Krok ${i+1}: Název = "${s.title}", Popis = ${s.desc.trim() ? `"${s.desc}"` : `(vymysli 1-2 věty popisu tohoto kroku)`}`).join("\n")}` : "JAK TO PROBÍHÁ — KLIENT NEZADAL → SEKCI ÚPLNĚ VYNECHEJ, NEZOBRAZUJ ji ani v navigaci!"}
 
 GALERIE (id="galerie")
 - Pozadí ${f.palette.bg}, padding 100px 0
@@ -768,10 +851,12 @@ KONTAKT (id="kontakt")
   • Kicker "Pojďme to probrat" (uppercase, opacity 0.7)
   • H2 "Kontaktujte nás" v bílé
   • Podtitulek 2 řádky
-  • 3 řádky info s ikonami (NEpřidávej pracovní dobu — uvádějte JEN to co je v zadání):
+  • Řádky info s ikonami (POUŽIJ POUZE ŘÁDKY KTERÉ KLIENT ZADAL, ostatní VYNECH):
+    ${f.contactPerson ? `👤 ${f.contactPerson}` : "(kontaktní osoba: NEZADÁNA — vynech řádek)"}
     📞 ${f.phone}
     ✉️ ${f.email}
     📍 ${f.address}, ${f.city}
+    ${f.openingHours ? `🕐 ${f.openingHours}` : "(pracovní doba: NEZADÁNA — VYNECH řádek, NIC NEVYMÝŠLEJ jako 'Po-Pá 8-17')"}
   • Pod info přidej Google Maps iframe:
     <iframe src="${mapsUrl}" width="100%" height="280" style="border:0;border-radius:16px;margin-top:24px;filter:grayscale(0.2)" allowfullscreen loading="lazy"></iframe>
 - Pravý sloupec — formulář v BÍLÉ kartě:
@@ -902,15 +987,16 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: "24px 20px" }}>
           {step === 0 && <StepFirma   f={f} upd={upd} />}
           {step === 1 && <StepSluzby  f={f} upd={upd} />}
-          {step === 2 && <StepFotky   f={f} upd={upd} />}
-          {step === 3 && <StepKontakt f={f} upd={upd} />}
-          {step === 4 && <StepRecenze f={f} upd={upd} />}
-          {step === 5 && <StepBarvy   f={f} upd={upd} />}
-          {step === 6 && <StepShrnutí f={f} onPay={handlePay} />}
-          {step < 6 && (
+          {step === 2 && <StepPostup  f={f} upd={upd} />}
+          {step === 3 && <StepFotky   f={f} upd={upd} />}
+          {step === 4 && <StepKontakt f={f} upd={upd} />}
+          {step === 5 && <StepRecenze f={f} upd={upd} />}
+          {step === 6 && <StepBarvy   f={f} upd={upd} />}
+          {step === 7 && <StepShrnutí f={f} onPay={handlePay} />}
+          {step < 7 && (
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 26, gap: 12 }}>
               {step > 0 ? <button style={btnB} onClick={() => setStep(s => s - 1)}>← Zpět</button> : <div />}
-              <button style={btnA} onClick={() => setStep(s => s + 1)}>{step === 5 ? "Zkontrolovat shrnutí →" : "Pokračovat →"}</button>
+              <button style={btnA} onClick={() => setStep(s => s + 1)}>{step === 6 ? "Zkontrolovat shrnutí →" : "Pokračovat →"}</button>
             </div>
           )}
         </div>
