@@ -329,8 +329,8 @@ function StepKontakt({ f, upd }) {
         {[
           { l: "Telefon *", key: "phone", ph: "+420 123 456 789" },
           { l: "Email *", key: "email", ph: "info@vase-firma.cz", type: "email" },
-          { l: "Ulice a číslo", key: "address", ph: "Hlavní 123" },
-          { l: "Město", key: "city", ph: "Praha" },
+          { l: "Ulice a číslo *", key: "address", ph: "Hlavní 123" },
+          { l: "Město *", key: "city", ph: "Praha" },
         ].map(({ l, key, ph, type }) => (
           <div key={key}><label style={lbl}>{l}</label><input style={inp} type={type || "text"} placeholder={ph} value={f[key]} onChange={e => upd(key, e.target.value)} /></div>
         ))}
@@ -597,6 +597,33 @@ export default function App() {
   });
 
   const upd = (k, v) => setF(p => ({ ...p, [k]: v }));
+
+  const validateStep = (s) => {
+    const missing = [];
+    if (s === 0) {
+      if (!f.companyName.trim()) missing.push("Název firmy");
+      if (!f.ico.trim())         missing.push("IČO");
+      if (!f.industry.trim())    missing.push("Obor podnikání");
+      if (!f.description.trim()) missing.push("Popis firmy");
+    } else if (s === 1) {
+      if (!f.services.some(srv => srv.name.trim())) missing.push("Alespoň jedna služba");
+    } else if (s === 4) {
+      if (!f.phone.trim())   missing.push("Telefon");
+      if (!f.email.trim())   missing.push("Email");
+      if (!f.address.trim()) missing.push("Ulice a číslo");
+      if (!f.city.trim())    missing.push("Město");
+    }
+    return missing;
+  };
+
+  const handleNext = () => {
+    const missing = validateStep(step);
+    if (missing.length > 0) {
+      alert(`Pro pokračování prosím vyplňte:\n\n• ${missing.join("\n• ")}`);
+      return;
+    }
+    setStep(s => s + 1);
+  };
 
   const handlePay = () => {
     const ok = window.confirm("DEMO — V produkci zde proběhne přesměrování na SimpleShop.\n\nSimulovat zaplacení a pokračovat?");
@@ -996,7 +1023,7 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
           {step < 7 && (
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 26, gap: 12 }}>
               {step > 0 ? <button style={btnB} onClick={() => setStep(s => s - 1)}>← Zpět</button> : <div />}
-              <button style={btnA} onClick={() => setStep(s => s + 1)}>{step === 6 ? "Zkontrolovat shrnutí →" : "Pokračovat →"}</button>
+              <button style={btnA} onClick={handleNext}>{step === 6 ? "Zkontrolovat shrnutí →" : "Pokračovat →"}</button>
             </div>
           )}
         </div>
