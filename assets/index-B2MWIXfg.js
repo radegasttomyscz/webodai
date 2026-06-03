@@ -206,7 +206,7 @@ ${C.map(I=>`    ✓ ${I}`).join(`
 
 PROČ MY (id="o-nas")
 - Bílé pozadí, padding 100px 0
-- H2 "Proč si vybrat ${c.companyName.split(" ")[0]}" + krátký podnadpis
+- H2 "Proč si vybrat ${c.companyName}" + krátký podnadpis (POUŽIJ CELÝ NÁZEV FIRMY, ne jen první slovo)
 - 3 sloupce s benefity v kartách:
   • Velká emoji ikona z DESIGN DNA v kruhu (60x60px, ${c.palette.primary} s 15% průhlednosti)
   • Nadpis benefitu (22px, weight 700)
