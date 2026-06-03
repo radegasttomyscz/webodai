@@ -995,7 +995,7 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
       <div style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(8,8,16,0.85)", backdropFilter: "blur(12px)", borderBottom: `1px solid ${C.border}`, marginBottom: 24 }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 24px" }}>
           <div onClick={() => setStarted(false)} style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-0.5px", cursor: "pointer" }}>
-            webodai<span style={{ color: C.accent }}>.</span>
+            webodai<span style={{ color: C.accent }}>.cz</span>
           </div>
           <button onClick={() => setStarted(false)} style={{ ...btnB, padding: "8px 16px", fontSize: 13 }}>← Zpět na úvod</button>
         </div>
