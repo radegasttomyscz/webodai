@@ -13,11 +13,11 @@ const PALETTES = [
 const STEPS = ["Firma", "Služby", "Postup", "Fotky", "Kontakt", "Recenze", "Barvy", "Shrnutí"];
 const C = {
   bg: "#080810", card: "#0f0f1a", card2: "#13131f",
-  border: "#1e1e30", accent: "#f97316", text: "#e2e8f0",
-  muted: "#64748b", input: "#0a0a16", success: "#16a34a",
+  border: "#2a2a3e", accent: "#f97316", text: "#f1f5f9",
+  muted: "#94a3b8", input: "#0a0a16", success: "#16a34a",
 };
 const inp = { width: "100%", padding: "12px 16px", background: C.input, border: `1px solid ${C.border}`, borderRadius: 10, color: C.text, fontSize: 15, outline: "none", boxSizing: "border-box", fontFamily: "inherit" };
-const lbl = { display: "block", fontSize: 12, fontWeight: 600, color: C.muted, marginBottom: 8, letterSpacing: "0.08em", textTransform: "uppercase" };
+const lbl = { display: "block", fontSize: 13, fontWeight: 600, color: "#cbd5e1", marginBottom: 8, letterSpacing: "0.06em", textTransform: "uppercase" };
 const btnA = { background: C.accent, border: "none", color: "white", padding: "13px 26px", borderRadius: 10, cursor: "pointer", fontSize: 15, fontWeight: 700, fontFamily: "inherit" };
 const btnB = { background: C.card2, border: `1px solid ${C.border}`, color: C.text, padding: "13px 22px", borderRadius: 10, cursor: "pointer", fontSize: 15, fontFamily: "inherit" };
 
@@ -984,8 +984,14 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
   if (loading)         return <LoadingScreen name={f.companyName} />;
   if (preview && html) return <PreviewScreen html={html} name={f.companyName} genCount={genCount} onRegen={generate} onBack={() => setPreview(false)} />;
 
+  const globalStyles = `
+    input::placeholder, textarea::placeholder { color: #64748b !important; opacity: 1; }
+    input:focus, textarea:focus { border-color: ${C.accent} !important; }
+  `;
+
   return (
     <div style={{ background: C.bg, minHeight: "100vh", color: C.text, fontFamily: "-apple-system,'Segoe UI',sans-serif", paddingBottom: 60 }}>
+      <style>{globalStyles}</style>
       <div style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(8,8,16,0.85)", backdropFilter: "blur(12px)", borderBottom: `1px solid ${C.border}`, marginBottom: 24 }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 24px" }}>
           <div onClick={() => setStarted(false)} style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-0.5px", cursor: "pointer" }}>
