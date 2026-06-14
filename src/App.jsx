@@ -14,15 +14,15 @@ const PALETTES = [
 ];
 const STEPS = ["Firma", "Nabídka", "Postup", "Fotky", "Kontakt", "Recenze", "Barvy", "Shrnutí"];
 const C = {
-  bg: "#070812", card: "#111320", card2: "#181b2d",
-  border: "#4b556f", accent: "#f97316", text: "#ffffff",
-  muted: "#d5dceb", input: "#090c18", success: "#22c55e",
+  bg: "#f4f6fb", card: "#ffffff", card2: "#f8fafc",
+  border: "#d6deeb", accent: "#f97316", text: "#111827",
+  muted: "#526174", input: "#ffffff", success: "#15803d",
 };
-const inp = { width: "100%", padding: "15px 16px", background: C.input, border: `1.5px solid ${C.border}`, borderRadius: 10, color: C.text, fontSize: 17, outline: "none", boxSizing: "border-box", fontFamily: "inherit", lineHeight: 1.35 };
-const lbl = { display: "block", fontSize: 14, fontWeight: 800, color: "#ffffff", marginBottom: 9, letterSpacing: "0.035em", textTransform: "uppercase" };
-const helpText = { fontSize: 14, color: C.muted, marginTop: 8, lineHeight: 1.55 };
-const btnA = { background: C.accent, border: "none", color: "white", padding: "14px 28px", borderRadius: 10, cursor: "pointer", fontSize: 16, fontWeight: 800, fontFamily: "inherit" };
-const btnB = { background: C.card2, border: `1.5px solid ${C.border}`, color: C.text, padding: "14px 22px", borderRadius: 10, cursor: "pointer", fontSize: 16, fontFamily: "inherit" };
+const inp = { width: "100%", padding: "14px 15px", background: C.input, border: `1.5px solid #c9d3e3`, borderRadius: 12, color: C.text, fontSize: 16, outline: "none", boxSizing: "border-box", fontFamily: "inherit", lineHeight: 1.4, boxShadow: "0 1px 2px rgba(16,24,40,0.04)" };
+const lbl = { display: "block", fontSize: 14, fontWeight: 850, color: C.text, marginBottom: 8, letterSpacing: 0 };
+const helpText = { fontSize: 13.5, color: C.muted, marginTop: 7, lineHeight: 1.5 };
+const btnA = { background: C.accent, border: "none", color: "white", padding: "14px 28px", borderRadius: 12, cursor: "pointer", fontSize: 16, fontWeight: 850, fontFamily: "inherit", boxShadow: "0 10px 24px rgba(249,115,22,0.28)" };
+const btnB = { background: C.card, border: `1.5px solid ${C.border}`, color: C.text, padding: "14px 22px", borderRadius: 12, cursor: "pointer", fontSize: 16, fontWeight: 750, fontFamily: "inherit" };
 
 // Komprese obrázků - zmenší a převede na base64
 async function compressImage(file, maxWidth = 1600, quality = 0.85, format = "jpeg") {
@@ -58,14 +58,14 @@ function FieldBadge({ required }) {
       display: "inline-flex",
       alignItems: "center",
       borderRadius: 999,
-      padding: "3px 8px",
-      fontSize: 11,
-      fontWeight: 900,
+      padding: "4px 9px",
+      fontSize: 12,
+      fontWeight: 850,
       letterSpacing: 0,
       textTransform: "none",
-      color: required ? "#bbf7d0" : "#fed7aa",
-      background: required ? C.success + "1f" : C.accent + "1f",
-      border: `1px solid ${required ? C.success + "66" : C.accent + "66"}`,
+      color: required ? "#ffffff" : "#9a3412",
+      background: required ? C.success : "#ffedd5",
+      border: `1px solid ${required ? C.success : "#fed7aa"}`,
     }}>
       {required ? "Povinné" : "Volitelné"}
     </span>
@@ -75,9 +75,8 @@ function FieldBadge({ required }) {
 function FormField({ label, children, help, full, required = false }) {
   return (
     <div className={full ? "form-field form-field-full" : "form-field"}>
-      <label style={{ ...lbl, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-        <span>{label}</span>
-        <FieldBadge required={required} />
+      <label style={lbl}>
+        <span>{label}{required && <span style={{ color: C.accent }}> *</span>}</span>
       </label>
       {children}
       {help && <div style={helpText}>{help}</div>}
@@ -87,11 +86,11 @@ function FormField({ label, children, help, full, required = false }) {
 
 function FormSection({ title, desc, required = false, children }) {
   return (
-    <section style={{ background: required ? C.card2 : C.input, border: `1.5px solid ${required ? "#64708f" : C.border}`, borderRadius: 16, padding: 18 }}>
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 14, marginBottom: 16 }}>
+    <section style={{ background: C.card, border: `1.5px solid ${required ? "#fdba74" : C.border}`, borderRadius: 18, padding: 22, boxShadow: required ? "0 18px 44px rgba(17,24,39,0.08)" : "0 10px 28px rgba(17,24,39,0.04)" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 14, marginBottom: 18 }}>
         <div>
-          <h3 style={{ margin: "0 0 5px", color: C.text, fontSize: 18, fontWeight: 900 }}>{title}</h3>
-          <p style={{ margin: 0, color: C.muted, fontSize: 14, lineHeight: 1.5 }}>{desc}</p>
+          <h3 style={{ margin: "0 0 5px", color: C.text, fontSize: 20, fontWeight: 900 }}>{title}</h3>
+          <p style={{ margin: 0, color: C.muted, fontSize: 15, lineHeight: 1.55 }}>{desc}</p>
         </div>
         <FieldBadge required={required} />
       </div>
@@ -101,20 +100,22 @@ function FormSection({ title, desc, required = false, children }) {
 }
 
 function StepFirma({ f, upd }) {
+  const trustFilled = f.trustPoints.filter(s => s.trim()).length;
+  const benefitsFilled = f.benefits.filter(b => b.title.trim()).length;
   return (
     <div>
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, color: C.accent, background: C.accent + "14", border: `1px solid ${C.accent}30`, borderRadius: 999, padding: "5px 10px", fontSize: 12, fontWeight: 800, marginBottom: 12 }}>
+      <div style={{ marginBottom: 22 }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "#9a3412", background: "#ffedd5", border: "1px solid #fed7aa", borderRadius: 999, padding: "6px 11px", fontSize: 13, fontWeight: 850, marginBottom: 12 }}>
           Krok 1 z {STEPS.length}
         </div>
-        <h2 style={{ margin: "0 0 8px", fontSize: 26, fontWeight: 800, color: C.text }}>O vaší firmě</h2>
-        <p style={{ color: C.muted, fontSize: 16, lineHeight: 1.6, margin: 0 }}>
-          Povinné údaje jsou označené zeleně. Volitelné můžete bez obav nechat prázdné.
+        <h2 style={{ margin: "0 0 8px", fontSize: 32, lineHeight: 1.12, fontWeight: 950, color: C.text }}>Nejdřív jen základ firmy</h2>
+        <p style={{ color: C.muted, fontSize: 17, lineHeight: 1.65, margin: 0, maxWidth: 720 }}>
+          Stačí čtyři povinné údaje. Doplňky níže jsou schované, ať formulář zbytečně nestraší.
         </p>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-        <FormSection title="1. Základ pro web" desc="Bez těchto údajů nejde pokračovat. Použijí se v textech, kontaktu a patičce webu." required>
+        <FormSection title="Povinný základ" desc="Tyhle údaje potřebujeme pro texty, patičku webu a GDPR. Bez nich nejde pokračovat." required>
           <div className="form-grid">
             <FormField label="Název firmy" required>
               <input style={inp} placeholder="např. Tesařství Novák s.r.o." value={f.companyName} onChange={e => upd("companyName", e.target.value)} />
@@ -131,66 +132,95 @@ function StepFirma({ f, upd }) {
           </div>
         </FormSection>
 
-        <FormSection title="2. Úvod webu" desc="Pomůže, když máte vlastní slogan nebo chcete ukázat rok založení. Jinak to AI doplní podle oboru.">
-          <div className="form-grid">
-            <FormField label="Hlavní slogan webu" help="Hlavní nadpis v horní části webu. Pokud nevyplníte, AI ho vymyslí podle oboru.">
-              <input style={inp} placeholder='např. "Voda v domě bez starostí, 24/7"' value={f.heroHeadline} onChange={e => upd("heroHeadline", e.target.value)} />
-            </FormField>
-            <FormField label="Rok založení" help="Vyplňte jen tehdy, když ho chcete opravdu ukázat na webu.">
-              <input style={inp} placeholder="např. 2005" value={f.founded} onChange={e => upd("founded", e.target.value)} />
-            </FormField>
-          </div>
-        </FormSection>
+        <details className="optional-details">
+          <summary>
+            <div>
+              <strong>Volitelné doplňky pro lepší web</strong>
+              <span>Slogan, rok založení, důvěryhodnost a benefity. Když je necháte prázdné, nic špatného se nestane.</span>
+            </div>
+            <div className="optional-summary-meta">
+              {trustFilled + benefitsFilled > 0 || f.heroHeadline || f.founded ? "Něco vyplněno" : "Přeskočit"}
+            </div>
+          </summary>
 
-        <FormSection title="3. Důvěryhodnost" desc="Krátká tvrzení pod hlavním nadpisem. Pokud nemáte co doplnit, sekce se přeskočí.">
-          <div className="compact-stack">
-            {[0, 1, 2].map(i => (
-              <input
-                key={i}
-                style={inp}
-                placeholder={i === 0 ? "např. 15 let na trhu" : i === 1 ? "např. Přes 200 spokojených klientů" : "např. Garance kvality"}
-                value={f.trustPoints[i] || ""}
-                onChange={e => {
-                  const arr = [...f.trustPoints];
-                  arr[i] = e.target.value;
-                  upd("trustPoints", arr);
-                }}
-              />
-            ))}
-          </div>
-        </FormSection>
-
-        <FormSection title="4. Benefity firmy" desc="Volitelná sekce „Proč si vybrat nás“. Vyplňte jen skutečné výhody, nic si nemusíte vymýšlet.">
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {[0, 1, 2].map(i => (
-              <div key={i} style={{ background: C.card2, border: `1px solid ${C.border}`, borderRadius: 12, padding: 12 }}>
-                <div style={{ color: C.muted, fontSize: 13, fontWeight: 800, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 8 }}>Benefit {i + 1}</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <input
-                    style={inp}
-                    placeholder={i === 0 ? "Název (např. Kvalitní řemeslná práce)" : i === 1 ? "Název (např. Rychlé dodání)" : "Název (např. Férové ceny)"}
-                    value={f.benefits[i]?.title || ""}
-                    onChange={e => {
-                      const arr = [...f.benefits];
-                      arr[i] = { ...arr[i], title: e.target.value };
-                      upd("benefits", arr);
-                    }}
-                  />
-                  <textarea
-                    style={{ ...inp, height: 70, resize: "vertical" }}
-                    placeholder="Krátký popis benefitu (volitelný — AI doplní)"
-                    value={f.benefits[i]?.desc || ""}
-                    onChange={e => {
-                      const arr = [...f.benefits];
-                      arr[i] = { ...arr[i], desc: e.target.value };
-                      upd("benefits", arr);
-                    }}
-                  />
-                </div>
+          <div className="optional-body">
+            <div className="mini-section">
+              <div className="mini-section-head">
+                <h3>Úvod webu</h3>
+                <FieldBadge required={false} />
               </div>
-            ))}
+              <p>Vlastní slogan vyplňte jen tehdy, když ho chcete použít přesně. Když zůstane prázdný, jako hlavní nadpis použijeme název firmy.</p>
+              <div className="form-grid">
+                <FormField label="Hlavní slogan webu" help="Použije se přesně jako hlavní nadpis. Nevymýšlíme za vás nový slogan, pokud pole necháte prázdné.">
+                  <input style={inp} placeholder='např. "Voda v domě bez starostí, 24/7"' value={f.heroHeadline} onChange={e => upd("heroHeadline", e.target.value)} />
+                </FormField>
+                <FormField label="Rok založení" help="Vyplňte jen tehdy, když ho chcete opravdu ukázat na webu.">
+                  <input style={inp} placeholder="např. 2005" value={f.founded} onChange={e => upd("founded", e.target.value)} />
+                </FormField>
+              </div>
+            </div>
+
+            <div className="mini-section">
+              <div className="mini-section-head">
+                <h3>Důvěryhodnost</h3>
+                <span className="mini-count">{trustFilled}/3</span>
+              </div>
+              <p>Krátká ověřitelná tvrzení pod hlavním nadpisem. Vyplňujte jen pravdu, AI si je nebude domýšlet.</p>
+              <div className="compact-stack">
+                {[0, 1, 2].map(i => (
+                  <input
+                    key={i}
+                    style={inp}
+                    placeholder={i === 0 ? "např. 15 let na trhu" : i === 1 ? "např. Přes 200 spokojených klientů" : "např. Garance kvality"}
+                    value={f.trustPoints[i] || ""}
+                    onChange={e => {
+                      const arr = [...f.trustPoints];
+                      arr[i] = e.target.value;
+                      upd("trustPoints", arr);
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="mini-section">
+              <div className="mini-section-head">
+                <h3>Benefity firmy</h3>
+                <span className="mini-count">{benefitsFilled}/3</span>
+              </div>
+              <p>Volitelná sekce „Proč si vybrat nás“. Vyplňte jen skutečné výhody, obecné fráze raději nechte pryč.</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {[0, 1, 2].map(i => (
+                  <div key={i} className="benefit-card">
+                    <div style={{ color: C.muted, fontSize: 13, fontWeight: 850, marginBottom: 8 }}>Benefit {i + 1}</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      <input
+                        style={inp}
+                        placeholder={i === 0 ? "Název (např. Kvalitní řemeslná práce)" : i === 1 ? "Název (např. Rychlé dodání)" : "Název (např. Férové ceny)"}
+                        value={f.benefits[i]?.title || ""}
+                        onChange={e => {
+                          const arr = [...f.benefits];
+                          arr[i] = { ...arr[i], title: e.target.value };
+                          upd("benefits", arr);
+                        }}
+                      />
+                      <textarea
+                        style={{ ...inp, height: 70, resize: "vertical" }}
+                        placeholder="Krátký popis benefitu (volitelný)"
+                        value={f.benefits[i]?.desc || ""}
+                        onChange={e => {
+                          const arr = [...f.benefits];
+                          arr[i] = { ...arr[i], desc: e.target.value };
+                          upd("benefits", arr);
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </FormSection>
+        </details>
       </div>
     </div>
   );
@@ -612,7 +642,7 @@ function StepShrnutí({ f, onPay }) {
         <Row label="Firma"     val={f.companyName} />
         <Row label="IČO"       val={f.ico} />
         <Row label="Obor"      val={f.industry} />
-        <Row label="Slogan"    val={f.heroHeadline || "AI vymyslí"} />
+        <Row label="Slogan"    val={f.heroHeadline || "Použije se název firmy"} />
         <Row label="Kontakt"   val={f.contactPerson || "—"} />
         <Row label="Tel."      val={f.phone} />
         <Row label="Email"     val={f.email} />
@@ -629,7 +659,7 @@ function StepShrnutí({ f, onPay }) {
         <Row label="Barva"     val={f.palette.name} />
         <Row label="GDPR"      val={f.gdprMode === "auto" ? "Automaticky" : "Vlastní text"} />
       </div>
-      <div style={{ background: "#091a0f", border: `1px solid ${C.success}40`, borderRadius: 12, padding: 18, marginBottom: 18 }}>
+      <div style={{ background: "#ecfdf3", border: `1.5px solid #bbf7d0`, borderRadius: 16, padding: 18, marginBottom: 18 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <div>
             <div style={{ color: C.text, fontWeight: 700, fontSize: 16 }}>Jednorázová webová stránka</div>
@@ -637,7 +667,7 @@ function StepShrnutí({ f, onPay }) {
           </div>
           <div style={{ fontSize: 26, fontWeight: 800, color: C.success }}>2 000 Kč</div>
         </div>
-        <div style={{ fontSize: 12, color: C.muted, borderTop: `1px solid ${C.border}`, paddingTop: 10 }}>Cena bez DPH · Po zaplacení obdržíte odkaz ke stažení webu emailem</div>
+        <div style={{ fontSize: 13, color: C.muted, borderTop: "1px solid #bbf7d0", paddingTop: 10 }}>Cena bez DPH · Po zaplacení obdržíte odkaz ke stažení webu emailem</div>
       </div>
       <button onClick={onPay} style={{ ...btnA, width: "100%", padding: "16px", fontSize: 16, background: "linear-gradient(135deg, #16a34a, #15803d)", textAlign: "center" }}>
         💳 Zaplatit 2 000 Kč a vygenerovat web →
@@ -666,14 +696,14 @@ function LoadingScreen({ name }) {
   ];
   const elapsed = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`;
   return (
-    <div style={{ minHeight: "100vh", background: `radial-gradient(circle at 50% 0%, ${C.accent}22, transparent 34%), ${C.bg}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "inherit", padding: 24 }}>
-      <div style={{ maxWidth: 760, width: "100%", background: C.card, border: `1.5px solid ${C.border}`, borderRadius: 24, padding: 32, boxShadow: "0 32px 100px rgba(0,0,0,0.45)" }}>
+    <div style={{ minHeight: "100vh", background: `radial-gradient(circle at 50% 0%, ${C.accent}18, transparent 34%), ${C.bg}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "inherit", padding: 24 }}>
+      <div style={{ maxWidth: 760, width: "100%", background: C.card, border: `1.5px solid ${C.border}`, borderRadius: 24, padding: 32, boxShadow: "0 28px 80px rgba(17,24,39,0.12)" }}>
         <div style={{ display: "flex", gap: 24, alignItems: "flex-start", flexWrap: "wrap" }}>
           <div style={{ width: 112, height: 112, borderRadius: 28, background: `linear-gradient(135deg, ${C.accent}, #fb923c)`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 20px 50px ${C.accent}33`, flexShrink: 0 }}>
             <div style={{ fontSize: 48, transform: `rotate(${(t % 12) * 30}deg)`, transition: "transform 0.8s ease" }}>⚙️</div>
           </div>
           <div style={{ flex: 1, minWidth: 280 }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "#fed7aa", background: C.accent + "18", border: `1px solid ${C.accent}55`, borderRadius: 999, padding: "6px 10px", fontSize: 13, fontWeight: 900, marginBottom: 14 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "#9a3412", background: "#ffedd5", border: "1px solid #fed7aa", borderRadius: 999, padding: "6px 10px", fontSize: 13, fontWeight: 900, marginBottom: 14 }}>
               Generování běží · {elapsed}
             </div>
             <h2 style={{ color: C.text, fontSize: 32, lineHeight: 1.12, fontWeight: 900, margin: "0 0 10px" }}>
@@ -835,7 +865,7 @@ function PreviewScreen({ html, name, genCount, onRegen, onBack }) {
   };
   return (
     <div style={{ background: `radial-gradient(circle at 50% 0%, ${C.accent}18, transparent 34%), ${C.bg}`, minHeight: "100vh", fontFamily: "inherit" }}>
-      <div style={{ padding: "14px 20px", background: "rgba(17,19,32,0.96)", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, position: "sticky", top: 0, zIndex: 100, backdropFilter: "blur(12px)", flexWrap: "wrap" }}>
+      <div style={{ padding: "14px 20px", background: "rgba(255,255,255,0.94)", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, position: "sticky", top: 0, zIndex: 100, backdropFilter: "blur(12px)", flexWrap: "wrap" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <button onClick={onBack} style={{ ...btnB, padding: "9px 14px", fontSize: 14 }}>← Upravit zadání</button>
           <span style={{ color: C.muted, fontSize: 14 }}>Náhled pro <strong style={{ color: C.text }}>{displayName}</strong></span>
@@ -848,7 +878,7 @@ function PreviewScreen({ html, name, genCount, onRegen, onBack }) {
       <div style={{ padding: "26px 20px 34px", maxWidth: 1240, margin: "0 auto" }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 18, alignItems: "stretch", marginBottom: 18 }}>
           <section style={{ flex: "1 1 620px", minWidth: 0, background: `linear-gradient(135deg, ${C.card2}, ${C.card})`, border: `1.5px solid ${C.border}`, borderRadius: 18, padding: 24, boxShadow: "0 26px 80px rgba(0,0,0,0.32)" }}>
-            <div style={{ display: "inline-flex", color: "#bbf7d0", background: `${C.success}1f`, border: `1px solid ${C.success}66`, borderRadius: 999, padding: "6px 10px", fontSize: 13, fontWeight: 900, marginBottom: 14 }}>
+            <div style={{ display: "inline-flex", color: C.success, background: "#ecfdf3", border: "1px solid #bbf7d0", borderRadius: 999, padding: "6px 10px", fontSize: 13, fontWeight: 900, marginBottom: 14 }}>
               Hotovo
             </div>
             <h1 style={{ color: C.text, fontSize: 34, lineHeight: 1.12, margin: "0 0 10px", fontWeight: 950 }}>
@@ -887,7 +917,7 @@ function PreviewScreen({ html, name, genCount, onRegen, onBack }) {
             <div style={{ flex: 1, background: C.input, borderRadius: 8, padding: "7px 12px", fontSize: 14, color: C.muted, minWidth: 180 }}>
               https://{domainName}.cz
             </div>
-            <div style={{ color: C.muted, fontSize: 13, display: "flex", gap: 8, alignItems: "center" }}>
+            <div style={{ color: "#e5e7eb", fontSize: 13, display: "flex", gap: 8, alignItems: "center" }}>
               <span style={{ width: 8, height: 8, borderRadius: "50%", background: C.success, display: "inline-block" }} />
               Náhled
             </div>
@@ -1346,65 +1376,116 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
   if (preview && html) return <PreviewScreen html={html} name={f.companyName} genCount={genCount} onRegen={generate} onBack={() => setPreview(false)} />;
 
   const globalStyles = `
-    input::placeholder, textarea::placeholder { color: #b8c7dc !important; opacity: 1; }
-    input:focus, textarea:focus { border-color: ${C.accent} !important; box-shadow: 0 0 0 3px ${C.accent}30; }
+    input::placeholder, textarea::placeholder { color: #718096 !important; opacity: 1; }
+    input:focus, textarea:focus { border-color: ${C.accent} !important; box-shadow: 0 0 0 4px ${C.accent}22; }
     input, textarea, button { -webkit-font-smoothing: antialiased; }
     .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
     .form-field-full { grid-column: 1 / -1; }
     .compact-stack { display: flex; flex-direction: column; gap: 8px; }
     .form-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; gap: 12px; }
+    .order-layout { display: grid; grid-template-columns: 280px minmax(0, 860px); gap: 26px; align-items: start; justify-content: center; }
+    .order-sidebar { position: sticky; top: 92px; background: #ffffff; border: 1.5px solid ${C.border}; border-radius: 18px; padding: 18px; box-shadow: 0 18px 45px rgba(17,24,39,0.06); }
+    .step-row { display: flex; align-items: center; gap: 11px; width: 100%; padding: 10px 9px; border-radius: 12px; border: 0; background: transparent; color: ${C.muted}; text-align: left; font: inherit; }
+    .step-row.is-current { background: #fff7ed; color: ${C.text}; }
+    .step-row.is-done { color: ${C.text}; cursor: pointer; }
+    .step-dot { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; flex-shrink: 0; background: #e7ecf5; color: ${C.muted}; }
+    .step-row.is-current .step-dot, .step-row.is-done .step-dot { background: ${C.accent}; color: white; }
+    .optional-details { background: #ffffff; border: 1.5px solid ${C.border}; border-radius: 18px; overflow: hidden; box-shadow: 0 10px 28px rgba(17,24,39,0.04); }
+    .optional-details summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; gap: 18px; align-items: center; padding: 20px 22px; }
+    .optional-details summary::-webkit-details-marker { display: none; }
+    .optional-details summary strong { display: block; color: ${C.text}; font-size: 18px; margin-bottom: 4px; }
+    .optional-details summary span { display: block; color: ${C.muted}; font-size: 14.5px; line-height: 1.5; }
+    .optional-summary-meta { flex-shrink: 0; border: 1px solid #fed7aa; background: #ffedd5; color: #9a3412; border-radius: 999px; padding: 6px 10px; font-size: 12px; font-weight: 850; }
+    .optional-body { padding: 0 22px 22px; display: flex; flex-direction: column; gap: 16px; border-top: 1px solid ${C.border}; }
+    .mini-section { background: ${C.card2}; border: 1px solid ${C.border}; border-radius: 15px; padding: 18px; }
+    .mini-section-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 6px; }
+    .mini-section h3 { margin: 0; color: ${C.text}; font-size: 18px; font-weight: 900; }
+    .mini-section p { margin: 0 0 14px; color: ${C.muted}; font-size: 14.5px; line-height: 1.55; }
+    .mini-count { border: 1px solid ${C.border}; background: #ffffff; color: ${C.muted}; border-radius: 999px; padding: 4px 9px; font-size: 12px; font-weight: 850; }
+    .benefit-card { background: #ffffff; border: 1px solid ${C.border}; border-radius: 13px; padding: 13px; }
     @media (max-width: 720px) {
       .form-grid { grid-template-columns: 1fr; }
       .form-field-full { grid-column: auto; }
-      .form-actions { position: sticky; bottom: 0; margin: 24px -16px -16px; padding: 14px 16px; background: rgba(15,15,26,0.96); border-top: 1px solid ${C.border}; backdrop-filter: blur(12px); }
+      .form-actions { position: sticky; bottom: 0; margin: 24px -18px -18px; padding: 14px 18px; background: rgba(255,255,255,0.96); border-top: 1px solid ${C.border}; backdrop-filter: blur(12px); }
+    }
+    @media (max-width: 980px) {
+      .order-layout { grid-template-columns: 1fr; max-width: 860px; margin: 0 auto; }
+      .order-sidebar { position: static; }
     }
   `;
 
   return (
-    <div style={{ background: C.bg, minHeight: "100vh", color: C.text, fontFamily: "-apple-system,'Segoe UI',sans-serif", paddingBottom: 60 }}>
+    <div style={{ background: `linear-gradient(180deg, #ffffff 0, ${C.bg} 260px)`, minHeight: "100vh", color: C.text, fontFamily: "-apple-system,'Segoe UI',sans-serif", paddingBottom: 60 }}>
       <style>{globalStyles}</style>
-      <div style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(8,8,16,0.85)", backdropFilter: "blur(12px)", borderBottom: `1px solid ${C.border}`, marginBottom: 24 }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 24px" }}>
+      <div style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(255,255,255,0.92)", backdropFilter: "blur(14px)", borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ maxWidth: 1180, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px", gap: 16 }}>
           <div onClick={() => setStarted(false)} style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-0.5px", cursor: "pointer" }}>
             webodai<span style={{ color: C.accent }}>.cz</span>
           </div>
-          <button onClick={() => setStarted(false)} style={{ ...btnB, padding: "8px 16px", fontSize: 13 }}>← Zpět na úvod</button>
-        </div>
-      </div>
-      <div style={{ textAlign: "center", margin: "0 auto 22px", padding: "0 24px", maxWidth: 820 }}>
-        <p style={{ color: C.muted, fontSize: 13, margin: 0 }}>Vyplňte objednávku po krocích. Povinné údaje držíme krátké, doplňky můžete přeskočit.</p>
-      </div>
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 0, marginBottom: 22, padding: "0 12px", flexWrap: "wrap" }}>
-        {STEPS.map((s, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "center" }}>
-            <div onClick={() => i < step && setStep(i)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 8px", borderRadius: 20, background: i === step ? C.accent + "20" : "transparent", cursor: i < step ? "pointer" : "default" }}>
-              <div style={{ width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, flexShrink: 0, background: i < step ? C.accent : i === step ? C.accent : C.border, color: "white" }}>
-                {i < step ? "✓" : i + 1}
-              </div>
-              <span style={{ fontSize: 12, fontWeight: i === step ? 600 : 400, color: i === step ? C.text : C.muted, whiteSpace: "nowrap" }}>{s}</span>
-            </div>
-            {i < STEPS.length - 1 && <div style={{ width: 8, height: 1, background: i < step ? C.accent : C.border, flexShrink: 0 }} />}
+          <div style={{ color: C.muted, fontSize: 14, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: C.success, display: "inline-block" }} />
+            Objednávka webu krok za krokem
           </div>
-        ))}
-      </div>
-      <div style={{ maxWidth: 860, margin: "0 auto", padding: "0 16px" }}>
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 20, padding: "30px 28px", boxShadow: "0 24px 80px rgba(0,0,0,0.28)" }}>
-          {step === 0 && <StepFirma   f={f} upd={upd} />}
-          {step === 1 && <StepSluzby  f={f} upd={upd} />}
-          {step === 2 && <StepPostup  f={f} upd={upd} />}
-          {step === 3 && <StepFotky   f={f} upd={upd} />}
-          {step === 4 && <StepKontakt f={f} upd={upd} />}
-          {step === 5 && <StepRecenze f={f} upd={upd} />}
-          {step === 6 && <StepBarvy   f={f} upd={upd} />}
-          {step === 7 && <StepShrnutí f={f} onPay={handlePay} />}
-          {step < 7 && (
-            <div className="form-actions">
-              {step > 0 ? <button style={btnB} onClick={() => setStep(s => s - 1)}>← Zpět</button> : <div />}
-              <button style={btnA} onClick={handleNext}>{step === 6 ? "Zkontrolovat shrnutí →" : "Pokračovat →"}</button>
-            </div>
-          )}
+          <button onClick={() => setStarted(false)} style={{ ...btnB, padding: "9px 15px", fontSize: 14 }}>← Zpět na úvod</button>
         </div>
-        <div style={{ textAlign: "center", marginTop: 14, color: C.muted, fontSize: 12 }}>🔒 Vaše údaje slouží pouze ke generování webu · Žádná registrace</div>
+      </div>
+
+      <div style={{ maxWidth: 1180, margin: "0 auto", padding: "28px 24px 0" }}>
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ color: "#9a3412", background: "#ffedd5", border: "1px solid #fed7aa", borderRadius: 999, padding: "6px 11px", display: "inline-flex", fontSize: 13, fontWeight: 850, marginBottom: 12 }}>
+            Bez registrace · výstup je HTML soubor
+          </div>
+          <h1 style={{ margin: "0 0 8px", fontSize: 38, lineHeight: 1.08, letterSpacing: "-0.03em", color: C.text }}>
+            Objednávka webu
+          </h1>
+          <p style={{ color: C.muted, fontSize: 17, lineHeight: 1.6, margin: 0, maxWidth: 760 }}>
+            Vyplňte jen to, co opravdu víte. Povinné údaje držíme krátké, zbytek můžete přeskočit.
+          </p>
+        </div>
+
+        <div className="order-layout">
+          <aside className="order-sidebar">
+            <div style={{ color: C.text, fontWeight: 900, fontSize: 18, marginBottom: 4 }}>Postup objednávky</div>
+            <div style={{ color: C.muted, fontSize: 14, lineHeight: 1.45, marginBottom: 12 }}>Krok {step + 1} z {STEPS.length}</div>
+            <div style={{ height: 8, background: "#e7ecf5", borderRadius: 999, overflow: "hidden", marginBottom: 14 }}>
+              <div style={{ width: `${((step + 1) / STEPS.length) * 100}%`, height: "100%", background: C.accent, borderRadius: 999 }} />
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              {STEPS.map((s, i) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => i < step && setStep(i)}
+                  className={`step-row ${i === step ? "is-current" : ""} ${i < step ? "is-done" : ""}`}
+                  disabled={i > step}
+                >
+                  <span className="step-dot">{i < step ? "✓" : i + 1}</span>
+                  <span style={{ fontWeight: i === step ? 900 : 750 }}>{s}</span>
+                </button>
+              ))}
+            </div>
+          </aside>
+
+          <main>
+            <div style={{ background: C.card, border: `1.5px solid ${C.border}`, borderRadius: 24, padding: "32px", boxShadow: "0 24px 70px rgba(17,24,39,0.08)" }}>
+              {step === 0 && <StepFirma   f={f} upd={upd} />}
+              {step === 1 && <StepSluzby  f={f} upd={upd} />}
+              {step === 2 && <StepPostup  f={f} upd={upd} />}
+              {step === 3 && <StepFotky   f={f} upd={upd} />}
+              {step === 4 && <StepKontakt f={f} upd={upd} />}
+              {step === 5 && <StepRecenze f={f} upd={upd} />}
+              {step === 6 && <StepBarvy   f={f} upd={upd} />}
+              {step === 7 && <StepShrnutí f={f} onPay={handlePay} />}
+              {step < 7 && (
+                <div className="form-actions">
+                  {step > 0 ? <button style={btnB} onClick={() => setStep(s => s - 1)}>← Zpět</button> : <div />}
+                  <button style={btnA} onClick={handleNext}>{step === 6 ? "Zkontrolovat shrnutí →" : "Pokračovat →"}</button>
+                </div>
+              )}
+            </div>
+            <div style={{ textAlign: "center", marginTop: 14, color: C.muted, fontSize: 13 }}>Vaše údaje slouží pouze ke generování webu. Žádná registrace.</div>
+          </main>
+        </div>
       </div>
     </div>
   );
