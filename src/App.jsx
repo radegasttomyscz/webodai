@@ -53,91 +53,165 @@ async function compressImage(file, maxWidth = 1600, quality = 0.85, format = "jp
   });
 }
 
+function FormField({ label, children, help, full }) {
+  return (
+    <div className={full ? "form-field form-field-full" : "form-field"}>
+      <label style={lbl}>{label}</label>
+      {children}
+      {help && <div style={helpText}>{help}</div>}
+    </div>
+  );
+}
+
+function OptionalPanel({ title, desc, badge, isOpen, onToggle, children }) {
+  return (
+    <div style={{ border: `1px solid ${C.border}`, borderRadius: 14, overflow: "hidden", background: C.input }}>
+      <button
+        type="button"
+        onClick={onToggle}
+        style={{ width: "100%", border: "none", background: "transparent", color: C.text, padding: "16px 18px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, textAlign: "left", fontFamily: "inherit" }}
+      >
+        <span>
+          <span style={{ display: "block", fontSize: 15, fontWeight: 800, marginBottom: 4 }}>{title}</span>
+          <span style={{ display: "block", fontSize: 13, color: C.muted, lineHeight: 1.45 }}>{desc}</span>
+        </span>
+        <span style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+          {badge && <span style={{ color: C.accent, background: C.accent + "18", border: `1px solid ${C.accent}40`, borderRadius: 999, padding: "4px 8px", fontSize: 12, fontWeight: 700 }}>{badge}</span>}
+          <span style={{ width: 28, height: 28, borderRadius: "50%", background: C.card2, border: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center", color: C.muted, fontSize: 18 }}>
+            {isOpen ? "−" : "+"}
+          </span>
+        </span>
+      </button>
+      {isOpen && <div style={{ padding: "0 18px 18px" }}>{children}</div>}
+    </div>
+  );
+}
+
 function StepFirma({ f, upd }) {
+  const [open, setOpen] = useState({ profile: false, trust: false });
+  const trustCount = f.trustPoints.filter(s => s.trim()).length;
+  const benefitCount = f.benefits.filter(b => b.title.trim()).length;
+
+  const toggle = key => setOpen(prev => ({ ...prev, [key]: !prev[key] }));
+
   return (
     <div>
-      <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 700, color: C.text }}>O vaší firmě</h2>
-      <p style={{ color: "#a8b3c4", fontSize: 14, margin: "0 0 24px" }}>Základní informace pro váš web. Pole označená <strong style={{ color: C.text }}>(volitelné)</strong> můžete přeskočit.</p>
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, color: C.accent, background: C.accent + "14", border: `1px solid ${C.accent}30`, borderRadius: 999, padding: "5px 10px", fontSize: 12, fontWeight: 800, marginBottom: 12 }}>
+          Krok 1 z {STEPS.length}
+        </div>
+        <h2 style={{ margin: "0 0 8px", fontSize: 26, fontWeight: 800, color: C.text }}>O vaší firmě</h2>
+        <p style={{ color: "#a8b3c4", fontSize: 15, lineHeight: 1.55, margin: 0 }}>
+          Pro pokračování stačí 4 povinné údaje. Doplňky níže jsou volitelné a pomůžou AI vytvořit osobnější web.
+        </p>
+      </div>
+
       <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-        <div>
-          <label style={lbl}>Název firmy *</label>
-          <input style={inp} placeholder="např. Tesařství Novák s.r.o." value={f.companyName} onChange={e => upd("companyName", e.target.value)} />
-        </div>
-        <div>
-          <label style={lbl}>IČO *</label>
-          <input style={inp} placeholder="12345678" value={f.ico} onChange={e => upd("ico", e.target.value)} maxLength={8} />
-          <div style={helpText}>Zobrazí se ve footeru a v GDPR sekci webu.</div>
-        </div>
-        <div>
-          <label style={lbl}>Obor podnikání *</label>
-          <input style={inp} placeholder="např. Truhlářství, Instalatérství, Kadeřnictví..." value={f.industry} onChange={e => upd("industry", e.target.value)} />
-          <div style={helpText}>Důležité — podle oboru se přizpůsobí obsah i vzhled vašeho webu.</div>
-        </div>
-        <div>
-          <label style={lbl}>Popis firmy *</label>
-          <textarea style={{ ...inp, height: 100, resize: "vertical" }} placeholder="Pár vět o vaší firmě — co děláte, kde působíte, čím se odlišujete..." value={f.description} onChange={e => upd("description", e.target.value)} />
-        </div>
-        <div>
-          <label style={lbl}>Hlavní slogan webu <span style={optTag}>(volitelné)</span></label>
-          <input style={inp} placeholder='např. "Voda v domě bez starostí, 24/7"' value={f.heroHeadline} onChange={e => upd("heroHeadline", e.target.value)} />
-          <div style={helpText}>Hlavní nadpis v horní části webu. Pokud nevyplníte, AI ho vymyslí podle oboru.</div>
-        </div>
-        <div>
-          <label style={lbl}>Rok založení <span style={optTag}>(volitelné)</span></label>
-          <input style={inp} placeholder="např. 2005" value={f.founded} onChange={e => upd("founded", e.target.value)} />
-        </div>
-        <div>
-          <label style={lbl}>Důvěryhodnost <span style={optTag}>(volitelné, max 3 body)</span></label>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {[0, 1, 2].map(i => (
-              <input
-                key={i}
-                style={inp}
-                placeholder={i === 0 ? "např. 15 let na trhu" : i === 1 ? "např. Přes 200 spokojených klientů" : "např. Garance kvality"}
-                value={f.trustPoints[i] || ""}
-                onChange={e => {
-                  const arr = [...f.trustPoints];
-                  arr[i] = e.target.value;
-                  upd("trustPoints", arr);
-                }}
-              />
-            ))}
+        <section style={{ background: C.card2, border: `1px solid ${C.border}`, borderRadius: 16, padding: 18 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16 }}>
+            <div>
+              <h3 style={{ margin: "0 0 4px", color: C.text, fontSize: 16, fontWeight: 800 }}>Základ pro web</h3>
+              <p style={{ margin: 0, color: C.muted, fontSize: 13 }}>Tyto údaje se použijí v obsahu, patičce a GDPR textu.</p>
+            </div>
+            <span style={{ background: C.success + "18", color: "#86efac", border: `1px solid ${C.success}45`, borderRadius: 999, padding: "5px 9px", fontSize: 12, fontWeight: 800, whiteSpace: "nowrap" }}>Povinné</span>
           </div>
-          <div style={helpText}>Krátké body, které se zobrazí pod hlavním nadpisem jako ✓ tvrzení. Co nevyplníte, nic se nezobrazí.</div>
-        </div>
-        <div>
-          <label style={lbl}>Tři hlavní benefity firmy <span style={optTag}>(volitelné)</span></label>
-          <div style={helpText}>Sekce "Proč si vybrat nás" na webu. Pokud nevyplníte žádný název, sekce se na webu nezobrazí — nebudeme nic vymýšlet.</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
-            {[0, 1, 2].map(i => (
-              <div key={i} style={{ background: C.input, border: `1px solid ${C.border}`, borderRadius: 10, padding: 12 }}>
-                <div style={{ color: "#a8b3c4", fontSize: 11, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 8 }}>Benefit {i + 1}</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+
+          <div className="form-grid">
+            <FormField label="Název firmy *">
+              <input style={inp} placeholder="např. Tesařství Novák s.r.o." value={f.companyName} onChange={e => upd("companyName", e.target.value)} />
+            </FormField>
+            <FormField label="IČO *" help="Zobrazí se ve footeru a v GDPR sekci webu.">
+              <input style={inp} placeholder="12345678" value={f.ico} onChange={e => upd("ico", e.target.value)} maxLength={8} />
+            </FormField>
+            <FormField label="Obor podnikání *" help="Podle oboru se přizpůsobí obsah i vzhled webu.">
+              <input style={inp} placeholder="např. Truhlářství, Instalatérství, Kadeřnictví..." value={f.industry} onChange={e => upd("industry", e.target.value)} />
+            </FormField>
+            <FormField label="Popis firmy *" full>
+              <textarea style={{ ...inp, height: 100, resize: "vertical" }} placeholder="Pár vět o vaší firmě — co děláte, kde působíte, čím se odlišujete..." value={f.description} onChange={e => upd("description", e.target.value)} />
+            </FormField>
+          </div>
+        </section>
+
+        <OptionalPanel
+          title="Vlastní slogan a historie"
+          desc="Můžete doplnit hlavní nadpis webu a rok založení. Když je necháte prázdné, AI si poradí podle oboru."
+          badge={(f.heroHeadline || f.founded) ? "Vyplněno" : "Volitelné"}
+          isOpen={open.profile}
+          onToggle={() => toggle("profile")}
+        >
+          <div className="form-grid">
+            <FormField label={<>Hlavní slogan webu <span style={optTag}>(volitelné)</span></>} help="Hlavní nadpis v horní části webu. Pokud nevyplníte, AI ho vymyslí podle oboru.">
+              <input style={inp} placeholder='např. "Voda v domě bez starostí, 24/7"' value={f.heroHeadline} onChange={e => upd("heroHeadline", e.target.value)} />
+            </FormField>
+            <FormField label={<>Rok založení <span style={optTag}>(volitelné)</span></>} help="Vyplňte jen tehdy, když ho chcete opravdu ukázat na webu.">
+              <input style={inp} placeholder="např. 2005" value={f.founded} onChange={e => upd("founded", e.target.value)} />
+            </FormField>
+          </div>
+        </OptionalPanel>
+
+        <OptionalPanel
+          title="Důvěryhodnost a benefity"
+          desc="Krátké body pod hero sekcí a samostatná sekce „Proč si vybrat nás“. Pokud je nevyplníte, na webu se nezobrazí."
+          badge={(trustCount + benefitCount) ? `${trustCount + benefitCount} vyplněno` : "Volitelné"}
+          isOpen={open.trust}
+          onToggle={() => toggle("trust")}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            <div>
+              <label style={lbl}>Důvěryhodnost <span style={optTag}>(max 3 body)</span></label>
+              <div className="compact-stack">
+                {[0, 1, 2].map(i => (
                   <input
+                    key={i}
                     style={inp}
-                    placeholder={i === 0 ? "Název (např. Kvalitní řemeslná práce)" : i === 1 ? "Název (např. Rychlé dodání)" : "Název (např. Férové ceny)"}
-                    value={f.benefits[i]?.title || ""}
+                    placeholder={i === 0 ? "např. 15 let na trhu" : i === 1 ? "např. Přes 200 spokojených klientů" : "např. Garance kvality"}
+                    value={f.trustPoints[i] || ""}
                     onChange={e => {
-                      const arr = [...f.benefits];
-                      arr[i] = { ...arr[i], title: e.target.value };
-                      upd("benefits", arr);
+                      const arr = [...f.trustPoints];
+                      arr[i] = e.target.value;
+                      upd("trustPoints", arr);
                     }}
                   />
-                  <textarea
-                    style={{ ...inp, height: 56, resize: "vertical", fontSize: 14 }}
-                    placeholder="Krátký popis benefitu (volitelný — AI doplní)"
-                    value={f.benefits[i]?.desc || ""}
-                    onChange={e => {
-                      const arr = [...f.benefits];
-                      arr[i] = { ...arr[i], desc: e.target.value };
-                      upd("benefits", arr);
-                    }}
-                  />
-                </div>
+                ))}
               </div>
-            ))}
+              <div style={helpText}>Zobrazí se jako krátká ✓ tvrzení pod hlavním nadpisem.</div>
+            </div>
+
+            <div>
+              <label style={lbl}>Tři hlavní benefity firmy <span style={optTag}>(volitelné)</span></label>
+              <div style={helpText}>Když nevyplníte žádný název, celá sekce se na webu vynechá.</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
+                {[0, 1, 2].map(i => (
+                  <div key={i} style={{ background: C.card2, border: `1px solid ${C.border}`, borderRadius: 12, padding: 12 }}>
+                    <div style={{ color: "#a8b3c4", fontSize: 11, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 8 }}>Benefit {i + 1}</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      <input
+                        style={inp}
+                        placeholder={i === 0 ? "Název (např. Kvalitní řemeslná práce)" : i === 1 ? "Název (např. Rychlé dodání)" : "Název (např. Férové ceny)"}
+                        value={f.benefits[i]?.title || ""}
+                        onChange={e => {
+                          const arr = [...f.benefits];
+                          arr[i] = { ...arr[i], title: e.target.value };
+                          upd("benefits", arr);
+                        }}
+                      />
+                      <textarea
+                        style={{ ...inp, height: 56, resize: "vertical", fontSize: 14 }}
+                        placeholder="Krátký popis benefitu (volitelný — AI doplní)"
+                        value={f.benefits[i]?.desc || ""}
+                        onChange={e => {
+                          const arr = [...f.benefits];
+                          arr[i] = { ...arr[i], desc: e.target.value };
+                          upd("benefits", arr);
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
+        </OptionalPanel>
       </div>
     </div>
   );
@@ -1084,6 +1158,15 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
   const globalStyles = `
     input::placeholder, textarea::placeholder { color: #64748b !important; opacity: 1; }
     input:focus, textarea:focus { border-color: ${C.accent} !important; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .form-field-full { grid-column: 1 / -1; }
+    .compact-stack { display: flex; flex-direction: column; gap: 8px; }
+    .form-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; gap: 12px; }
+    @media (max-width: 720px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .form-field-full { grid-column: auto; }
+      .form-actions { position: sticky; bottom: 0; margin: 24px -16px -16px; padding: 14px 16px; background: rgba(15,15,26,0.96); border-top: 1px solid ${C.border}; backdrop-filter: blur(12px); }
+    }
   `;
 
   return (
@@ -1097,8 +1180,8 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
           <button onClick={() => setStarted(false)} style={{ ...btnB, padding: "8px 16px", fontSize: 13 }}>← Zpět na úvod</button>
         </div>
       </div>
-      <div style={{ textAlign: "center", margin: "0 auto 22px", padding: "0 24px", maxWidth: 720 }}>
-        <p style={{ color: C.muted, fontSize: 13, margin: 0 }}>Vyplňte formulář a AI vygeneruje váš profesionální web. Trvá to 5 minut.</p>
+      <div style={{ textAlign: "center", margin: "0 auto 22px", padding: "0 24px", maxWidth: 820 }}>
+        <p style={{ color: C.muted, fontSize: 13, margin: 0 }}>Vyplňte objednávku po krocích. Povinné údaje držíme krátké, doplňky můžete přeskočit.</p>
       </div>
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 0, marginBottom: 22, padding: "0 12px", flexWrap: "wrap" }}>
         {STEPS.map((s, i) => (
@@ -1113,8 +1196,8 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
           </div>
         ))}
       </div>
-      <div style={{ maxWidth: 560, margin: "0 auto", padding: "0 16px" }}>
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: "24px 20px" }}>
+      <div style={{ maxWidth: 860, margin: "0 auto", padding: "0 16px" }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 20, padding: "30px 28px", boxShadow: "0 24px 80px rgba(0,0,0,0.28)" }}>
           {step === 0 && <StepFirma   f={f} upd={upd} />}
           {step === 1 && <StepSluzby  f={f} upd={upd} />}
           {step === 2 && <StepPostup  f={f} upd={upd} />}
@@ -1124,7 +1207,7 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
           {step === 6 && <StepBarvy   f={f} upd={upd} />}
           {step === 7 && <StepShrnutí f={f} onPay={handlePay} />}
           {step < 7 && (
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 26, gap: 12 }}>
+            <div className="form-actions">
               {step > 0 ? <button style={btnB} onClick={() => setStep(s => s - 1)}>← Zpět</button> : <div />}
               <button style={btnA} onClick={handleNext}>{step === 6 ? "Zkontrolovat shrnutí →" : "Pokračovat →"}</button>
             </div>
