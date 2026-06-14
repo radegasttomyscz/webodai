@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import Landing from "./Landing";
 
 const MAX_GENERATIONS = 3;
+const WORKER_URL = import.meta.env.VITE_WORKER_URL || "https://webodaii.tomyscz1.workers.dev";
+const GENERATION_TIMEOUT_MS = 120000;
 const PALETTES = [
   { id: "orange",   name: "Oranžová", primary: "#c2410c", accent: "#f97316", bg: "#fff7ed" },
   { id: "blue",     name: "Modrá",    primary: "#1e3a8a", accent: "#3b82f6", bg: "#eff6ff" },
@@ -618,7 +620,12 @@ function PreviewScreen({ html, name, genCount, onRegen, onBack }) {
               🔒 {name.toLowerCase().replace(/\s+/g,"")}.cz
             </div>
           </div>
-          <iframe srcDoc={html} style={{ width: "100%", height: "72vh", border: "none", display: "block" }} title="Náhled" />
+          <iframe
+            srcDoc={html}
+            sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+            style={{ width: "100%", height: "72vh", border: "none", display: "block" }}
+            title="Náhled"
+          />
         </div>
         <div style={{ marginTop: 14, padding: 18, background: C.card, borderRadius: 12, border: `1px solid ${C.border}`, display: "flex", gap: 14, alignItems: "flex-start" }}>
           <span style={{ fontSize: 26, flexShrink: 0 }}>✅</span>
@@ -701,6 +708,8 @@ export default function App() {
       return;
     }
     setLoading(true);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), GENERATION_TIMEOUT_MS);
     try {
       const services = f.services.filter(s => s.name.trim());
       const reviews = f.reviews.filter(r => r.text.trim());
@@ -879,7 +888,7 @@ HERO (id="home", min-height: 92vh)
   • 2 buttony: primární "Nezávazná poptávka" (#kontakt), sekundární outline "Naše služby" (#sluzby)
   • Pod buttony ${trustList.length > 0 ? `${trustList.length} trust elementy s ikonkou ✓ — POUŽIJ PŘESNĚ TYTO TEXTY, NIC NEVYMÝŠLEJ:\n${trustList.map(t => `    ✓ ${t}`).join("\n")}` : "NEZOBRAZUJ žádné trust elementy ani ✓ tvrzení — klient žádné neuvedl"}
 - Pravý sloupec:
-  ${hasHero ? "• Použij <img src='{{HERO_IMAGE}}' alt='${f.companyName}' style='width:100%;height:600px;object-fit:cover;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.15)'>" : "• CSS pattern dle DESIGN DNA oboru: gradient + geometrické tvary, border-radius 24px, výška 500-600px"}
+  ${hasHero ? `• Použij <img src="{{HERO_IMAGE}}" alt="${f.companyName}" style="width:100%;height:600px;object-fit:cover;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.15)">` : "• CSS pattern dle DESIGN DNA oboru: gradient + geometrické tvary, border-radius 24px, výška 500-600px"}
 
 ${hasBenefits ? `PROČ MY (id="o-nas")
 - Bílé pozadí, padding 100px 0
@@ -990,7 +999,7 @@ FOOTER
   • Sloupec 3: "Navigace" + odkazy na sekce
 - Spodní řádek: border-top, padding-top 30px, flex space-between
   • Vlevo: © ${new Date().getFullYear()} ${f.companyName} | IČO: ${f.ico}
-  • Vpravo: <a href="#gdpr">Ochrana osobních údajů</a>
+  • Vpravo: <a href="#" onclick="document.getElementById('gdpr-modal').style.display='flex';return false">Ochrana osobních údajů</a>
 
 ═══ TECHNICKÉ ═══
 - Mobile-first responzivní (640, 768, 1024px)
@@ -1008,12 +1017,13 @@ FOOTER
 
 VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
 
-      const res = await fetch("https://webodaii.tomyscz1.workers.dev", {
+      const res = await fetch(WORKER_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "anthropic-version": "2023-06-01",
         },
+        signal: controller.signal,
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001",
           max_tokens: 16000,
@@ -1023,15 +1033,27 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
 
       const text = await res.text();
       let data;
-      try { data = JSON.parse(text); } catch { alert("Chyba: " + text.slice(0, 200)); setLoading(false); return; }
-      if (!data.content) { alert("API chyba: " + JSON.stringify(data).slice(0, 300)); setLoading(false); return; }
+      try {
+        data = JSON.parse(text);
+      } catch {
+        alert("Worker nevrátil platnou JSON odpověď: " + text.slice(0, 200));
+        return;
+      }
+      if (!res.ok) {
+        const message = data?.error?.message || data?.error || JSON.stringify(data).slice(0, 300);
+        alert(`API chyba (${res.status}): ${message}`);
+        return;
+      }
+      if (!Array.isArray(data.content)) {
+        alert("API vrátilo nečekaný formát odpovědi: " + JSON.stringify(data).slice(0, 300));
+        return;
+      }
       let raw = data.content.map(b => b.text || "").join("");
       raw = raw.replace(/^```html?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
 
       // Kontrola — pokud generování nedokončilo, neúčtujeme pokus
       if (!raw.includes("</html>") || raw.length < 3000) {
         alert("Generování se nedokončilo (web je nekompletní). Zkuste to prosím znovu — tento pokus se vám nezapočítá.");
-        setLoading(false);
         return;
       }
 
@@ -1046,9 +1068,13 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
       setGenCount(c => c + 1);
       setPreview(true);
     } catch (e) {
-      alert("Chyba: " + e.message);
+      alert(e.name === "AbortError"
+        ? "Generování trvalo příliš dlouho a bylo ukončeno. Zkuste to prosím znovu."
+        : "Chyba: " + e.message);
+    } finally {
+      clearTimeout(timeoutId);
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   if (!started)        return <Landing onStart={() => setStarted(true)} />;
