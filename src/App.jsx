@@ -12,18 +12,18 @@ const PALETTES = [
   { id: "burgundy", name: "Vínová",   primary: "#7f1d1d", accent: "#b91c1c", bg: "#fef2f2" },
   { id: "white",    name: "Bílá",     primary: "#18181b", accent: "#52525b", bg: "#ffffff" },
 ];
-const STEPS = ["Firma", "Služby", "Postup", "Fotky", "Kontakt", "Recenze", "Barvy", "Shrnutí"];
+const STEPS = ["Firma", "Nabídka", "Postup", "Fotky", "Kontakt", "Recenze", "Barvy", "Shrnutí"];
 const C = {
-  bg: "#080810", card: "#0f0f1a", card2: "#13131f",
-  border: "#2a2a3e", accent: "#f97316", text: "#f1f5f9",
-  muted: "#94a3b8", input: "#0a0a16", success: "#16a34a",
+  bg: "#070812", card: "#111320", card2: "#181b2d",
+  border: "#4b556f", accent: "#f97316", text: "#ffffff",
+  muted: "#d5dceb", input: "#090c18", success: "#22c55e",
 };
-const inp = { width: "100%", padding: "13px 16px", background: C.input, border: `1px solid ${C.border}`, borderRadius: 10, color: C.text, fontSize: 16, outline: "none", boxSizing: "border-box", fontFamily: "inherit" };
-const lbl = { display: "block", fontSize: 13, fontWeight: 700, color: "#e2e8f0", marginBottom: 8, letterSpacing: "0.04em", textTransform: "uppercase" };
-const helpText = { fontSize: 13, color: "#a8b3c4", marginTop: 6, lineHeight: 1.5 };
-const optTag = { color: "#94a3b8", fontWeight: 500, fontSize: 11, marginLeft: 6, textTransform: "lowercase", letterSpacing: 0 };
-const btnA = { background: C.accent, border: "none", color: "white", padding: "13px 26px", borderRadius: 10, cursor: "pointer", fontSize: 15, fontWeight: 700, fontFamily: "inherit" };
-const btnB = { background: C.card2, border: `1px solid ${C.border}`, color: C.text, padding: "13px 22px", borderRadius: 10, cursor: "pointer", fontSize: 15, fontFamily: "inherit" };
+const inp = { width: "100%", padding: "15px 16px", background: C.input, border: `1.5px solid ${C.border}`, borderRadius: 10, color: C.text, fontSize: 17, outline: "none", boxSizing: "border-box", fontFamily: "inherit", lineHeight: 1.35 };
+const lbl = { display: "block", fontSize: 14, fontWeight: 800, color: "#ffffff", marginBottom: 9, letterSpacing: "0.035em", textTransform: "uppercase" };
+const helpText = { fontSize: 14, color: C.muted, marginTop: 8, lineHeight: 1.55 };
+const optTag = { color: "#cbd5e1", fontWeight: 700, fontSize: 12, marginLeft: 6, textTransform: "lowercase", letterSpacing: 0 };
+const btnA = { background: C.accent, border: "none", color: "white", padding: "14px 28px", borderRadius: 10, cursor: "pointer", fontSize: 16, fontWeight: 800, fontFamily: "inherit" };
+const btnB = { background: C.card2, border: `1.5px solid ${C.border}`, color: C.text, padding: "14px 22px", borderRadius: 10, cursor: "pointer", fontSize: 16, fontFamily: "inherit" };
 
 // Komprese obrázků - zmenší a převede na base64
 async function compressImage(file, maxWidth = 1600, quality = 0.85, format = "jpeg") {
@@ -101,7 +101,7 @@ function StepFirma({ f, upd }) {
           Krok 1 z {STEPS.length}
         </div>
         <h2 style={{ margin: "0 0 8px", fontSize: 26, fontWeight: 800, color: C.text }}>O vaší firmě</h2>
-        <p style={{ color: "#a8b3c4", fontSize: 15, lineHeight: 1.55, margin: 0 }}>
+        <p style={{ color: C.muted, fontSize: 16, lineHeight: 1.6, margin: 0 }}>
           Pro pokračování stačí 4 povinné údaje. Doplňky níže jsou volitelné a pomůžou AI vytvořit osobnější web.
         </p>
       </div>
@@ -111,7 +111,7 @@ function StepFirma({ f, upd }) {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16 }}>
             <div>
               <h3 style={{ margin: "0 0 4px", color: C.text, fontSize: 16, fontWeight: 800 }}>Základ pro web</h3>
-              <p style={{ margin: 0, color: C.muted, fontSize: 13 }}>Tyto údaje se použijí v obsahu, patičce a GDPR textu.</p>
+              <p style={{ margin: 0, color: C.muted, fontSize: 14, lineHeight: 1.45 }}>Tyto údaje se použijí v obsahu, patičce a GDPR textu.</p>
             </div>
             <span style={{ background: C.success + "18", color: "#86efac", border: `1px solid ${C.success}45`, borderRadius: 999, padding: "5px 9px", fontSize: 12, fontWeight: 800, whiteSpace: "nowrap" }}>Povinné</span>
           </div>
@@ -183,7 +183,7 @@ function StepFirma({ f, upd }) {
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
                 {[0, 1, 2].map(i => (
                   <div key={i} style={{ background: C.card2, border: `1px solid ${C.border}`, borderRadius: 12, padding: 12 }}>
-                    <div style={{ color: "#a8b3c4", fontSize: 11, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 8 }}>Benefit {i + 1}</div>
+                    <div style={{ color: C.muted, fontSize: 13, fontWeight: 800, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 8 }}>Benefit {i + 1}</div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                       <input
                         style={inp}
@@ -223,20 +223,33 @@ function StepSluzby({ f, upd }) {
   const setField = (i, k, v) => { const s = [...f.services]; s[i] = { ...s[i], [k]: v }; upd("services", s); };
   return (
     <div>
-      <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 700, color: C.text }}>Vaše služby</h2>
-      <p style={{ color: "#a8b3c4", fontSize: 14, margin: "0 0 20px" }}>Co nabízíte zákazníkům? Popis u každé služby je volitelný.</p>
+      <h2 style={{ margin: "0 0 6px", fontSize: 26, fontWeight: 800, color: C.text }}>Vaše nabídka</h2>
+      <p style={{ color: C.muted, fontSize: 15, lineHeight: 1.55, margin: "0 0 20px" }}>
+        Nemusí jít jen o služby. U řemeslníka to budou služby, u posilovny tréninky, lekce nebo členství, u restaurace třeba menu.
+      </p>
 
-      <div style={{ background: C.input, border: `1px solid ${C.border}`, borderRadius: 10, padding: 14, marginBottom: 18 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: C.text, marginBottom: 10 }}>Popisy služeb, které nevyplníte:</div>
+      <div style={{ background: C.card2, border: `1.5px solid ${C.border}`, borderRadius: 14, padding: 16, marginBottom: 18 }}>
+        <label style={lbl}>Jak tuto část na webu nazvat <span style={optTag}>(volitelné)</span></label>
+        <input
+          style={inp}
+          placeholder='např. Služby, Nabídka, Tréninky a členství, Lekce, Menu'
+          value={f.offerSectionTitle}
+          onChange={e => upd("offerSectionTitle", e.target.value)}
+        />
+        <div style={helpText}>Když nevyplníte, AI zvolí název podle oboru podnikání.</div>
+      </div>
+
+      <div style={{ background: C.input, border: `1.5px solid ${C.border}`, borderRadius: 12, padding: 16, marginBottom: 18 }}>
+        <div style={{ fontSize: 14, fontWeight: 800, color: C.text, marginBottom: 10 }}>Popisy položek, které nevyplníte:</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {[
-            { id: false, label: "Nechat jen názvy služeb", desc: "Karta na webu obsahuje jen název služby, bez popisu." },
-            { id: true, label: "AI doplní popisy automaticky", desc: "AI napíše 1–2 věty pro každou službu, kde popis nevyplníte." },
+            { id: false, label: "Nechat jen názvy", desc: "Karta na webu obsahuje jen název položky, bez popisu." },
+            { id: true, label: "AI doplní popisy automaticky", desc: "AI napíše 1–2 věty pro každou položku podle oboru." },
           ].map(o => (
-            <div key={String(o.id)} onClick={() => upd("aiFillServiceDesc", o.id)} style={{ border: `2px solid ${f.aiFillServiceDesc === o.id ? C.accent : C.border}`, borderRadius: 8, padding: "10px 12px", cursor: "pointer", background: f.aiFillServiceDesc === o.id ? C.accent + "15" : C.card2, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+            <div key={String(o.id)} onClick={() => upd("aiFillServiceDesc", o.id)} style={{ border: `2px solid ${f.aiFillServiceDesc === o.id ? C.accent : C.border}`, borderRadius: 10, padding: "12px 14px", cursor: "pointer", background: f.aiFillServiceDesc === o.id ? C.accent + "18" : C.card2, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
               <div>
-                <div style={{ fontWeight: 600, color: C.text, fontSize: 14 }}>{o.label}</div>
-                <div style={{ fontSize: 12, color: "#a8b3c4", marginTop: 2 }}>{o.desc}</div>
+                <div style={{ fontWeight: 800, color: C.text, fontSize: 15 }}>{o.label}</div>
+                <div style={{ fontSize: 14, color: C.muted, marginTop: 3, lineHeight: 1.45 }}>{o.desc}</div>
               </div>
               {f.aiFillServiceDesc === o.id && <span style={{ color: C.accent, fontWeight: 700, fontSize: 16 }}>✓</span>}
             </div>
@@ -246,18 +259,18 @@ function StepSluzby({ f, upd }) {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {f.services.map((s, i) => (
-          <div key={i} style={{ background: C.input, border: `1px solid ${C.border}`, borderRadius: 12, padding: 14 }}>
+          <div key={i} style={{ background: C.input, border: `1.5px solid ${C.border}`, borderRadius: 12, padding: 16 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <span style={{ color: "#a8b3c4", fontSize: 12, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>Služba {i + 1}</span>
+              <span style={{ color: C.muted, fontSize: 13, fontWeight: 800, letterSpacing: "0.05em", textTransform: "uppercase" }}>Položka nabídky {i + 1}</span>
               {f.services.length > 1 && <button onClick={() => del(i)} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", fontSize: 18, padding: 0 }}>×</button>}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <input style={inp} placeholder="Název služby (např. Výroba nábytku na míru)" value={s.name} onChange={e => setField(i, "name", e.target.value)} />
-              <textarea style={{ ...inp, height: 60, resize: "vertical", fontSize: 14 }} placeholder="Popis služby (volitelný)" value={s.desc} onChange={e => setField(i, "desc", e.target.value)} />
+              <input style={inp} placeholder="Název (např. Osobní trénink, Měsíční členství, Výroba nábytku)" value={s.name} onChange={e => setField(i, "name", e.target.value)} />
+              <textarea style={{ ...inp, height: 72, resize: "vertical" }} placeholder="Popis (volitelný)" value={s.desc} onChange={e => setField(i, "desc", e.target.value)} />
             </div>
           </div>
         ))}
-        <button onClick={add} style={{ border: `1px dashed ${C.border}`, background: "none", color: "#a8b3c4", borderRadius: 10, padding: 12, cursor: "pointer", fontSize: 14 }}>+ Přidat službu</button>
+        <button onClick={add} style={{ border: `1.5px dashed ${C.border}`, background: C.card2, color: C.text, borderRadius: 10, padding: 14, cursor: "pointer", fontSize: 15, fontWeight: 800 }}>+ Přidat položku nabídky</button>
       </div>
     </div>
   );
@@ -272,8 +285,8 @@ function StepPostup({ f, upd }) {
   return (
     <div>
       <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 700, color: C.text }}>Jak u vás probíhá spolupráce</h2>
-      <p style={{ color: "#a8b3c4", fontSize: 14, margin: "0 0 16px" }}>4 vlastní kroky — od první poptávky po předání.</p>
-      <div style={{ padding: "10px 14px", background: C.input, borderRadius: 8, border: `1px solid ${C.border}`, fontSize: 13, color: "#a8b3c4", lineHeight: 1.5, marginBottom: 18 }}>
+      <p style={{ color: C.muted, fontSize: 15, lineHeight: 1.55, margin: "0 0 16px" }}>4 vlastní kroky — od první poptávky po předání.</p>
+      <div style={{ padding: "12px 14px", background: C.input, borderRadius: 8, border: `1.5px solid ${C.border}`, fontSize: 14, color: C.muted, lineHeight: 1.55, marginBottom: 18 }}>
         ℹ️ Sekce "Jak to probíhá" se na webu zobrazí <strong style={{ color: C.text }}>pouze pokud vyplníte název u všech 4 kroků</strong>. Jinak se sekce na webu vůbec nezobrazí (nic se nevymýšlí).
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -281,7 +294,7 @@ function StepPostup({ f, upd }) {
           <div key={i} style={{ background: C.input, border: `1px solid ${C.border}`, borderRadius: 12, padding: 14 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
               <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.accent, color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 13, flexShrink: 0 }}>{i + 1}</div>
-              <span style={{ color: "#a8b3c4", fontSize: 12, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>Krok {i + 1}</span>
+              <span style={{ color: C.muted, fontSize: 13, fontWeight: 800, letterSpacing: "0.05em", textTransform: "uppercase" }}>Krok {i + 1}</span>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <input style={inp} placeholder={i === 0 ? "Název (např. Nezávazná poptávka)" : i === 1 ? "Název (např. Konzultace)" : i === 2 ? "Název (např. Realizace)" : "Název (např. Předání a záruka)"} value={s.title} onChange={e => setField(i, "title", e.target.value)} />
@@ -501,7 +514,7 @@ function StepKontakt({ f, upd }) {
         </div>
 
         <div style={{ paddingTop: 8, borderTop: `1px solid ${C.border}` }}>
-          <div style={{ padding: "10px 14px", background: C.input, borderRadius: 8, border: `1px solid ${C.border}`, fontSize: 13, color: "#a8b3c4", lineHeight: 1.5, marginTop: 10 }}>
+          <div style={{ padding: "12px 14px", background: C.input, borderRadius: 8, border: `1.5px solid ${C.border}`, fontSize: 14, color: C.muted, lineHeight: 1.55, marginTop: 10 }}>
             🗺️ <strong style={{ color: C.text }}>Mapa s adresou</strong> se vygeneruje automaticky z vyplněné adresy a města.
           </div>
         </div>
@@ -591,6 +604,7 @@ function StepShrnutí({ f, onPay }) {
   const galleryCount = f.gallery.filter(Boolean).length;
   const socialList = [f.facebook && "FB", f.instagram && "IG", f.linkedin && "IN"].filter(Boolean).join(", ");
   const processCount = f.processSteps.filter(s => s.title.trim()).length;
+  const offerTitle = f.offerSectionTitle.trim() || "AI zvolí podle oboru";
   const Row = ({ label, val }) => val ? (
     <div style={{ display: "flex", gap: 12, padding: "8px 0", borderBottom: `1px solid ${C.border}` }}>
       <span style={{ color: C.muted, fontSize: 13, minWidth: 100 }}>{label}</span>
@@ -612,7 +626,8 @@ function StepShrnutí({ f, onPay }) {
         <Row label="Adresa"    val={[f.address, f.city].filter(Boolean).join(", ")} />
         <Row label="Hodiny"    val={f.openingHours || "—"} />
         <Row label="Sítě"      val={socialList || "—"} />
-        <Row label="Služby"    val={services.map(s => s.name).join(", ")} />
+        <Row label="Nabídka"   val={services.map(s => s.name).join(", ")} />
+        <Row label="Název sekce" val={offerTitle} />
         <Row label="Postup"    val={processCount === 4 ? "✓ 4 vlastní kroky" : "Sekci vynechat"} />
         <Row label="Hero foto" val={f.heroImage ? "✓ Nahráno" : "—"} />
         <Row label="Galerie"   val={galleryCount > 0 ? `${galleryCount}× foto` : "—"} />
@@ -727,6 +742,7 @@ export default function App() {
     companyName: "", ico: "", industry: "", description: "", founded: "",
     heroHeadline: "",
     services: [{ name: "", desc: "" }, { name: "", desc: "" }, { name: "", desc: "" }],
+    offerSectionTitle: "",
     aiFillServiceDesc: false,
     trustPoints: ["", "", ""],
     benefits: [{ title: "", desc: "" }, { title: "", desc: "" }, { title: "", desc: "" }],
@@ -752,7 +768,7 @@ export default function App() {
       if (!f.industry.trim())    missing.push("Obor podnikání");
       if (!f.description.trim()) missing.push("Popis firmy");
     } else if (s === 1) {
-      if (!f.services.some(srv => srv.name.trim())) missing.push("Alespoň jedna služba");
+      if (!f.services.some(srv => srv.name.trim())) missing.push("Alespoň jedna položka nabídky");
     } else if (s === 4) {
       if (!f.phone.trim())   missing.push("Telefon");
       if (!f.email.trim())   missing.push("Email");
@@ -786,6 +802,8 @@ export default function App() {
     const timeoutId = setTimeout(() => controller.abort(), GENERATION_TIMEOUT_MS);
     try {
       const services = f.services.filter(s => s.name.trim());
+      const offerSectionTitle = f.offerSectionTitle.trim();
+      const offerLabel = offerSectionTitle || "AI ZVOLÍ PODLE OBORU";
       const reviews = f.reviews.filter(r => r.text.trim());
       const trustList = f.trustPoints.filter(s => s.trim());
       const benefitsList = f.benefits.filter(b => b.title.trim());
@@ -817,10 +835,11 @@ VRAŤ POUZE čistý HTML kód začínající <!DOCTYPE html>. Bez markdown, bez 
 1. NIKDY si nevymýšlej faktické údaje které nejsou v zadání: počty zákazníků, roky existence (pokud není v "Působí od"), pracovní dobu, ceny, certifikace, ocenění, jména zaměstnanců, lokality navíc.
 2. Pokud je nějaká informace označena "NEZADÁNO" nebo "NEZOBRAZUJ" — opravdu ji vynech, neimprovizuj náhradu.
 3. Pokud je text označen "POUŽIJ PŘESNĚ" — vlož ho přesně tak jak je, neparafrázuj.
-4. Marketingové texty (proč my, benefity služeb) které nejsou zadané MŮŽEŠ vymýšlet — ale obecně, bez konkrétních čísel, dat či faktů. "Kvalitní řemeslná práce" ANO. "Více než 100 spokojených zákazníků" NE (pokud to není v zadání).
+4. Marketingové texty (proč my, popisy nabídky, benefity) které nejsou zadané MŮŽEŠ vymýšlet — ale obecně, bez konkrétních čísel, dat či faktů. "Kvalitní řemeslná práce" ANO. "Více než 100 spokojených zákazníků" NE (pokud to není v zadání).
 5. Pokud klient nezadal kontaktní osobu, recenze, pracovní dobu, postup, benefity — tyto sekce/řádky NEZOBRAZUJ.
 6. ČESKÁ GRAMATIKA: Píšeš PEČLIVĚ správnou českou gramatikou. Pozor zejména na háčky a čárky (ě/š/č/ř/ž/ý/á/í/é/ú/ů). PŘÍKLAD CHYBY: "Ozveěte se" je špatně, správně je "Ozvěte se". Před odesláním ZKONTROLUJ každé slovo s diakritikou.
 7. KONTRAST: Pokud má sekce barevné pozadí (např. zelené/modré v kontakt sekci), text v ní MUSÍ být bílý nebo s velmi vysokou opacitou (min. rgba(255,255,255,0.9)). NIKDY šedý text na barevném pozadí!
+8. ČITELNOST PRO STARŠÍ UŽIVATELE: body text min. 16px, důležité texty 18px+, line-height min. 1.55. Dodrž kontrast alespoň WCAG AA. Na světlém pozadí používej tmavý text #111827 a sekundární text max. #4b5563. Na tmavém nebo barevném pozadí používej bílý text nebo rgba(255,255,255,0.92+). Placeholdery, popisky a malé poznámky nesmí být příliš světlé/šedé.
 
 ═══ FIRMA ═══
 Název: ${f.companyName}
@@ -831,8 +850,10 @@ ${f.founded ? `Působí od: ${f.founded}` : ""}
 ${f.contactPerson ? `Kontaktní osoba: ${f.contactPerson}` : ""}
 ${f.heroHeadline ? `HLAVNÍ SLOGAN (POUŽIJ PŘESNĚ TENTO TEXT JAKO H1 V HERO): "${f.heroHeadline}"` : `HLAVNÍ SLOGAN: NEZADÁN — vymysli silnou benefit větu jako H1 pro obor "${f.industry}"`}
 
-SLUŽBY (POUŽIJ PŘESNĚ TYTO NÁZVY, NIC NEVYMÝŠLEJ NAVÍC!):
-${services.map((s, i) => `${i+1}. ${s.name}${s.desc.trim() ? `\n   Popis (POUŽIJ PŘESNĚ): "${s.desc}"` : `\n   Popis: NEZADÁN — vymysli 1-2 věty popisu specifické pro tuto službu v oboru "${f.industry}"`}`).join("\n")}
+NABÍDKA (může znamenat služby, lekce, členství, produkty, menu, balíčky — přizpůsob oboru):
+Preferovaný název sekce: ${offerLabel}
+POUŽIJ PŘESNĚ TYTO NÁZVY POLOŽEK, NIC NEVYMÝŠLEJ NAVÍC:
+${services.map((s, i) => `${i+1}. ${s.name}${s.desc.trim() ? `\n   Popis (POUŽIJ PŘESNĚ): "${s.desc}"` : `\n   Popis: NEZADÁN — vymysli 1-2 věty popisu specifické pro tuto položku nabídky v oboru "${f.industry}"`}`).join("\n")}
 
 Kontakt — POUŽIJ POUZE TYTO ÚDAJE, NIC NEVYMÝŠLEJ:
 Telefon: ${f.phone}
@@ -939,7 +960,7 @@ BAREVNÉ POUŽITÍ
 - Většina sekcí: ${f.palette.bg}
 - Některé sekce: čistá bílá pro kontrast
 - Akcent ${f.palette.primary}: pouze CTA, hover, ikony — NIKDY pozadí celých sekcí
-- Text: tmavá #1a1a1a, sekundární: #6b6b6b
+- Text: tmavá #111827, sekundární: #4b5563
 - Footer: tmavé pozadí #0f0f0f s bílým textem
 
 ═══ KROK 3: STRUKTURA ═══
@@ -949,7 +970,7 @@ NAVIGACE (sticky)
 - Text v navigaci VŽDY tmavý: logo color #0f0f0f, menu items color #444. NEMĚŇ barvy nikdy.
 - Padding 16px 0, sticky top:0, z-index:100
 - ${hasLogo ? "Logo vlevo (img tag s {{LOGO}})" : "Logo vlevo = název firmy v hlavním fontu, weight 800"}
-- Menu: Domů${hasBenefits ? " · O nás" : ""} · Služby${hasProcess ? " · Jak to probíhá" : ""}${galleryCount > 0 ? " · Galerie" : ""}${reviews.length ? " · Recenze" : ""} · Kontakt
+- Menu: Domů${hasBenefits ? " · O nás" : ""} · ${offerSectionTitle || "Nabídka"}${hasProcess ? " · Jak to probíhá" : ""}${galleryCount > 0 ? " · Galerie" : ""}${reviews.length ? " · Recenze" : ""} · Kontakt
 - Vpravo malé CTA "Poptávka" (#kontakt)
 - Mobile: hamburger animovaný do plnoobrazovkového menu
 
@@ -959,7 +980,7 @@ HERO (id="home", min-height: 92vh)
   • MALÝ kicker badge NAHOŘE nad H1 (KRITICKÉ: max font-size 13px, padding 6px 14px, uppercase, color: ${f.palette.primary}, background: ${f.palette.primary}15, border-radius 100px, letter-spacing 0.1em, display: inline-block, marginBottom: 24px) — vymysli krátký 3–5 slov text pro obor (např. "Profesionální péče o nehty"). NESMÍ být velký nadpis, je to JEN MALÝ ŠTÍTEK!
   • H1 = ${f.heroHeadline ? `POUŽIJ PŘESNĚ TENTO TEXT: "${f.heroHeadline}"` : `SILNÝ HEADLINE (NE jen název firmy!) — benefit věta specifická pro obor "${f.industry}"`}
   • Podtitulek 18-20px, 2 řádky max
-  • 2 buttony: primární "Nezávazná poptávka" (#kontakt), sekundární outline "Naše služby" (#sluzby)
+  • 2 buttony: primární "Nezávazná poptávka" (#kontakt), sekundární outline "${offerSectionTitle || "Naše nabídka"}" (#sluzby)
   • Pod buttony ${trustList.length > 0 ? `${trustList.length} trust elementy s ikonkou ✓ — POUŽIJ PŘESNĚ TYTO TEXTY, NIC NEVYMÝŠLEJ:\n${trustList.map(t => `    ✓ ${t}`).join("\n")}` : "NEZOBRAZUJ žádné trust elementy ani ✓ tvrzení — klient žádné neuvedl"}
 - Pravý sloupec:
   ${hasHero ? `• Použij <img src="{{HERO_IMAGE}}" alt="${f.companyName}" style="width:100%;height:600px;object-fit:cover;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.15)">` : "• CSS pattern dle DESIGN DNA oboru: gradient + geometrické tvary, border-radius 24px, výška 500-600px"}
@@ -974,18 +995,19 @@ ${hasBenefits ? `PROČ MY (id="o-nas")
 - POUŽIJ PŘESNĚ TYTO BENEFITY (klient je zadal — NEVYMÝŠLEJ JINÉ ANI NEPŘIDÁVEJ DALŠÍ!):
 ${benefitsList.map((b, i) => `  Karta ${i+1}: Nadpis = "${b.title}", Popis = ${b.desc.trim() ? `"${b.desc}"` : `(vymysli obecný popis 2-3 věty k tomuto benefitu, bez konkrétních čísel a faktů)`}`).join("\n")}` : `PROČ MY — KLIENT NEZADAL ŽÁDNÉ BENEFITY → SEKCI "Proč si vybrat" ÚPLNĚ VYNECHEJ! NEVYMÝŠLEJ vlastní benefity jako "Moderní technika", "Přesné termíny", "Osobní přístup" apod. — sekce prostě nebude na webu, vynech ji i v navigaci.`}
 
-SLUŽBY (id="sluzby")
+NABÍDKA (id="sluzby")
 - Pozadí ${f.palette.bg}, padding 100px 0
-- H2 "Co pro vás děláme" + podnadpis
+- H2: ${offerSectionTitle ? `POUŽIJ PŘESNĚ "${offerSectionTitle}"` : `zvol přirozený název podle oboru "${f.industry}" — např. řemeslník: "Co pro vás děláme", fitness/posilovna: "Tréninky a členství", restaurace: "Co nabízíme", salon: "Péče a služby"`}
+- Podnadpis přizpůsob oboru. U fitness nepiš jako řemeslník; mluv o tréninku, lekcích, členství, vybavení nebo programech podle zadaných položek.
 - Grid karet (3 sloupce desktop, 2 tablet, 1 mobil)
 - Karta: bílé pozadí, padding 32px, border-radius 16px
   • Velká emoji ikona z DESIGN DNA vlevo nahoře
-  • Nadpis služby (20px weight 700)
-  • Popis služby
+  • Nadpis položky nabídky (20px weight 700)
+  • Popis položky nabídky
   • Šipka → vpravo dole
 - Hover: translateY(-6px), prohloubený stín
-- Služby (POUŽIJ POUZE TYTO, NIC NAVÍC):
-${services.map((s, i) => `  Karta ${i+1}: Název = "${s.name}", Popis = ${s.desc.trim() ? `"${s.desc}"` : aiFillSvc ? `(vymysli 1-2 věty popisu specifické pro tuto službu v oboru "${f.industry}", bez konkrétních čísel/faktů)` : `(POPIS NEZADÁN A KLIENT NECHCE AI VYPLNĚNÍ — zobraz JEN název služby v kartě, BEZ jakéhokoli popisu pod ním)`}`).join("\n")}
+- Položky nabídky (POUŽIJ POUZE TYTO, NIC NAVÍC):
+${services.map((s, i) => `  Karta ${i+1}: Název = "${s.name}", Popis = ${s.desc.trim() ? `"${s.desc}"` : aiFillSvc ? `(vymysli 1-2 věty popisu specifické pro tuto položku v oboru "${f.industry}", bez konkrétních čísel/faktů)` : `(POPIS NEZADÁN A KLIENT NECHCE AI VYPLNĚNÍ — zobraz JEN název položky v kartě, BEZ jakéhokoli popisu pod ním)`}`).join("\n")}
 
 ${hasProcess ? `JAK TO PROBÍHÁ (id="proces")
 - Bílé pozadí, padding 100px 0
@@ -1156,8 +1178,9 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
   if (preview && html) return <PreviewScreen html={html} name={f.companyName} genCount={genCount} onRegen={generate} onBack={() => setPreview(false)} />;
 
   const globalStyles = `
-    input::placeholder, textarea::placeholder { color: #64748b !important; opacity: 1; }
-    input:focus, textarea:focus { border-color: ${C.accent} !important; }
+    input::placeholder, textarea::placeholder { color: #b8c7dc !important; opacity: 1; }
+    input:focus, textarea:focus { border-color: ${C.accent} !important; box-shadow: 0 0 0 3px ${C.accent}30; }
+    input, textarea, button { -webkit-font-smoothing: antialiased; }
     .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
     .form-field-full { grid-column: 1 / -1; }
     .compact-stack { display: flex; flex-direction: column; gap: 8px; }
