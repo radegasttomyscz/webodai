@@ -14,15 +14,15 @@ const PALETTES = [
 ];
 const STEPS = ["Firma", "Nabídka", "Postup", "Fotky", "Kontakt", "Recenze", "Barvy", "Shrnutí"];
 const C = {
-  bg: "#f4f6fb", card: "#ffffff", card2: "#f8fafc",
-  border: "#d6deeb", accent: "#f97316", text: "#111827",
-  muted: "#526174", input: "#ffffff", success: "#15803d",
+  bg: "#080810", card: "#0f1020", card2: "#151829",
+  border: "#31384f", accent: "#f97316", text: "#f8fafc",
+  muted: "#c4cfdd", input: "#090b16", success: "#22c55e",
 };
-const inp = { width: "100%", padding: "14px 15px", background: C.input, border: `1.5px solid #c9d3e3`, borderRadius: 12, color: C.text, fontSize: 16, outline: "none", boxSizing: "border-box", fontFamily: "inherit", lineHeight: 1.4, boxShadow: "0 1px 2px rgba(16,24,40,0.04)" };
+const inp = { width: "100%", padding: "14px 15px", background: C.input, border: `1.5px solid ${C.border}`, borderRadius: 12, color: C.text, fontSize: 16, outline: "none", boxSizing: "border-box", fontFamily: "inherit", lineHeight: 1.4, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)" };
 const lbl = { display: "block", fontSize: 14, fontWeight: 850, color: C.text, marginBottom: 8, letterSpacing: 0 };
 const helpText = { fontSize: 13.5, color: C.muted, marginTop: 7, lineHeight: 1.5 };
-const btnA = { background: C.accent, border: "none", color: "white", padding: "14px 28px", borderRadius: 12, cursor: "pointer", fontSize: 16, fontWeight: 850, fontFamily: "inherit", boxShadow: "0 10px 24px rgba(249,115,22,0.28)" };
-const btnB = { background: C.card, border: `1.5px solid ${C.border}`, color: C.text, padding: "14px 22px", borderRadius: 12, cursor: "pointer", fontSize: 16, fontWeight: 750, fontFamily: "inherit" };
+const btnA = { background: C.accent, border: "none", color: "white", padding: "14px 28px", borderRadius: 12, cursor: "pointer", fontSize: 16, fontWeight: 850, fontFamily: "inherit", boxShadow: "0 12px 30px rgba(249,115,22,0.28)" };
+const btnB = { background: C.card2, border: `1.5px solid ${C.border}`, color: C.text, padding: "14px 22px", borderRadius: 12, cursor: "pointer", fontSize: 16, fontWeight: 750, fontFamily: "inherit" };
 
 // Komprese obrázků - zmenší a převede na base64
 async function compressImage(file, maxWidth = 1600, quality = 0.85, format = "jpeg") {
@@ -63,9 +63,9 @@ function FieldBadge({ required }) {
       fontWeight: 850,
       letterSpacing: 0,
       textTransform: "none",
-      color: required ? "#ffffff" : "#9a3412",
-      background: required ? C.success : "#ffedd5",
-      border: `1px solid ${required ? C.success : "#fed7aa"}`,
+      color: required ? "#bbf7d0" : "#fed7aa",
+      background: required ? C.success + "1f" : C.accent + "1f",
+      border: `1px solid ${required ? C.success + "66" : C.accent + "66"}`,
     }}>
       {required ? "Povinné" : "Volitelné"}
     </span>
@@ -86,7 +86,7 @@ function FormField({ label, children, help, full, required = false }) {
 
 function FormSection({ title, desc, required = false, children }) {
   return (
-    <section style={{ background: C.card, border: `1.5px solid ${required ? "#fdba74" : C.border}`, borderRadius: 18, padding: 22, boxShadow: required ? "0 18px 44px rgba(17,24,39,0.08)" : "0 10px 28px rgba(17,24,39,0.04)" }}>
+    <section style={{ background: required ? C.card2 : C.card, border: `1.5px solid ${required ? C.accent + "88" : C.border}`, borderRadius: 18, padding: 22, boxShadow: required ? "0 22px 70px rgba(0,0,0,0.28)" : "0 16px 50px rgba(0,0,0,0.18)" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 14, marginBottom: 18 }}>
         <div>
           <h3 style={{ margin: "0 0 5px", color: C.text, fontSize: 20, fontWeight: 900 }}>{title}</h3>
@@ -105,7 +105,7 @@ function StepFirma({ f, upd }) {
   return (
     <div>
       <div style={{ marginBottom: 22 }}>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "#9a3412", background: "#ffedd5", border: "1px solid #fed7aa", borderRadius: 999, padding: "6px 11px", fontSize: 13, fontWeight: 850, marginBottom: 12 }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "#fed7aa", background: C.accent + "1f", border: `1px solid ${C.accent}66`, borderRadius: 999, padding: "6px 11px", fontSize: 13, fontWeight: 850, marginBottom: 12 }}>
           Krok 1 z {STEPS.length}
         </div>
         <h2 style={{ margin: "0 0 8px", fontSize: 32, lineHeight: 1.12, fontWeight: 950, color: C.text }}>Nejdřív jen základ firmy</h2>
@@ -659,7 +659,7 @@ function StepShrnutí({ f, onPay }) {
         <Row label="Barva"     val={f.palette.name} />
         <Row label="GDPR"      val={f.gdprMode === "auto" ? "Automaticky" : "Vlastní text"} />
       </div>
-      <div style={{ background: "#ecfdf3", border: `1.5px solid #bbf7d0`, borderRadius: 16, padding: 18, marginBottom: 18 }}>
+      <div style={{ background: "rgba(34,197,94,0.10)", border: `1.5px solid ${C.success}66`, borderRadius: 16, padding: 18, marginBottom: 18 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <div>
             <div style={{ color: C.text, fontWeight: 700, fontSize: 16 }}>Jednorázová webová stránka</div>
@@ -667,7 +667,7 @@ function StepShrnutí({ f, onPay }) {
           </div>
           <div style={{ fontSize: 26, fontWeight: 800, color: C.success }}>2 000 Kč</div>
         </div>
-        <div style={{ fontSize: 13, color: C.muted, borderTop: "1px solid #bbf7d0", paddingTop: 10 }}>Cena bez DPH · Po zaplacení obdržíte odkaz ke stažení webu emailem</div>
+        <div style={{ fontSize: 13, color: C.muted, borderTop: `1px solid ${C.success}44`, paddingTop: 10 }}>Cena bez DPH · Po zaplacení obdržíte odkaz ke stažení webu emailem</div>
       </div>
       <button onClick={onPay} style={{ ...btnA, width: "100%", padding: "16px", fontSize: 16, background: "linear-gradient(135deg, #16a34a, #15803d)", textAlign: "center" }}>
         💳 Zaplatit 2 000 Kč a vygenerovat web →
@@ -697,13 +697,13 @@ function LoadingScreen({ name }) {
   const elapsed = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`;
   return (
     <div style={{ minHeight: "100vh", background: `radial-gradient(circle at 50% 0%, ${C.accent}18, transparent 34%), ${C.bg}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "inherit", padding: 24 }}>
-      <div style={{ maxWidth: 760, width: "100%", background: C.card, border: `1.5px solid ${C.border}`, borderRadius: 24, padding: 32, boxShadow: "0 28px 80px rgba(17,24,39,0.12)" }}>
+      <div style={{ maxWidth: 760, width: "100%", background: `linear-gradient(180deg, ${C.card2}, ${C.card})`, border: `1.5px solid ${C.border}`, borderRadius: 24, padding: 32, boxShadow: "0 32px 100px rgba(0,0,0,0.38)" }}>
         <div style={{ display: "flex", gap: 24, alignItems: "flex-start", flexWrap: "wrap" }}>
           <div style={{ width: 112, height: 112, borderRadius: 28, background: `linear-gradient(135deg, ${C.accent}, #fb923c)`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 20px 50px ${C.accent}33`, flexShrink: 0 }}>
             <div style={{ fontSize: 48, transform: `rotate(${(t % 12) * 30}deg)`, transition: "transform 0.8s ease" }}>⚙️</div>
           </div>
           <div style={{ flex: 1, minWidth: 280 }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "#9a3412", background: "#ffedd5", border: "1px solid #fed7aa", borderRadius: 999, padding: "6px 10px", fontSize: 13, fontWeight: 900, marginBottom: 14 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "#fed7aa", background: C.accent + "1f", border: `1px solid ${C.accent}66`, borderRadius: 999, padding: "6px 10px", fontSize: 13, fontWeight: 900, marginBottom: 14 }}>
               Generování běží · {elapsed}
             </div>
             <h2 style={{ color: C.text, fontSize: 32, lineHeight: 1.12, fontWeight: 900, margin: "0 0 10px" }}>
@@ -865,7 +865,7 @@ function PreviewScreen({ html, name, genCount, onRegen, onBack }) {
   };
   return (
     <div style={{ background: `radial-gradient(circle at 50% 0%, ${C.accent}18, transparent 34%), ${C.bg}`, minHeight: "100vh", fontFamily: "inherit" }}>
-      <div style={{ padding: "14px 20px", background: "rgba(255,255,255,0.94)", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, position: "sticky", top: 0, zIndex: 100, backdropFilter: "blur(12px)", flexWrap: "wrap" }}>
+      <div style={{ padding: "14px 20px", background: "rgba(8,8,16,0.92)", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, position: "sticky", top: 0, zIndex: 100, backdropFilter: "blur(12px)", flexWrap: "wrap" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <button onClick={onBack} style={{ ...btnB, padding: "9px 14px", fontSize: 14 }}>← Upravit zadání</button>
           <span style={{ color: C.muted, fontSize: 14 }}>Náhled pro <strong style={{ color: C.text }}>{displayName}</strong></span>
@@ -878,7 +878,7 @@ function PreviewScreen({ html, name, genCount, onRegen, onBack }) {
       <div style={{ padding: "26px 20px 34px", maxWidth: 1240, margin: "0 auto" }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 18, alignItems: "stretch", marginBottom: 18 }}>
           <section style={{ flex: "1 1 620px", minWidth: 0, background: `linear-gradient(135deg, ${C.card2}, ${C.card})`, border: `1.5px solid ${C.border}`, borderRadius: 18, padding: 24, boxShadow: "0 26px 80px rgba(0,0,0,0.32)" }}>
-            <div style={{ display: "inline-flex", color: C.success, background: "#ecfdf3", border: "1px solid #bbf7d0", borderRadius: 999, padding: "6px 10px", fontSize: 13, fontWeight: 900, marginBottom: 14 }}>
+            <div style={{ display: "inline-flex", color: "#bbf7d0", background: C.success + "1f", border: `1px solid ${C.success}66`, borderRadius: 999, padding: "6px 10px", fontSize: 13, fontWeight: 900, marginBottom: 14 }}>
               Hotovo
             </div>
             <h1 style={{ color: C.text, fontSize: 34, lineHeight: 1.12, margin: "0 0 10px", fontWeight: 950 }}>
@@ -1376,7 +1376,7 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
   if (preview && html) return <PreviewScreen html={html} name={f.companyName} genCount={genCount} onRegen={generate} onBack={() => setPreview(false)} />;
 
   const globalStyles = `
-    input::placeholder, textarea::placeholder { color: #718096 !important; opacity: 1; }
+    input::placeholder, textarea::placeholder { color: #8fa0b7 !important; opacity: 1; }
     input:focus, textarea:focus { border-color: ${C.accent} !important; box-shadow: 0 0 0 4px ${C.accent}22; }
     input, textarea, button { -webkit-font-smoothing: antialiased; }
     .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
@@ -1384,29 +1384,29 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
     .compact-stack { display: flex; flex-direction: column; gap: 8px; }
     .form-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; gap: 12px; }
     .order-layout { display: grid; grid-template-columns: 280px minmax(0, 860px); gap: 26px; align-items: start; justify-content: center; }
-    .order-sidebar { position: sticky; top: 92px; background: #ffffff; border: 1.5px solid ${C.border}; border-radius: 18px; padding: 18px; box-shadow: 0 18px 45px rgba(17,24,39,0.06); }
+    .order-sidebar { position: sticky; top: 92px; background: linear-gradient(180deg, ${C.card2}, ${C.card}); border: 1.5px solid ${C.border}; border-radius: 18px; padding: 18px; box-shadow: 0 24px 80px rgba(0,0,0,0.28); }
     .step-row { display: flex; align-items: center; gap: 11px; width: 100%; padding: 10px 9px; border-radius: 12px; border: 0; background: transparent; color: ${C.muted}; text-align: left; font: inherit; }
-    .step-row.is-current { background: #fff7ed; color: ${C.text}; }
+    .step-row.is-current { background: ${C.accent}1f; color: ${C.text}; }
     .step-row.is-done { color: ${C.text}; cursor: pointer; }
-    .step-dot { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; flex-shrink: 0; background: #e7ecf5; color: ${C.muted}; }
+    .step-dot { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; flex-shrink: 0; background: ${C.input}; color: ${C.muted}; border: 1px solid ${C.border}; }
     .step-row.is-current .step-dot, .step-row.is-done .step-dot { background: ${C.accent}; color: white; }
-    .optional-details { background: #ffffff; border: 1.5px solid ${C.border}; border-radius: 18px; overflow: hidden; box-shadow: 0 10px 28px rgba(17,24,39,0.04); }
+    .optional-details { background: ${C.card}; border: 1.5px solid ${C.border}; border-radius: 18px; overflow: hidden; box-shadow: 0 16px 50px rgba(0,0,0,0.18); }
     .optional-details summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; gap: 18px; align-items: center; padding: 20px 22px; }
     .optional-details summary::-webkit-details-marker { display: none; }
     .optional-details summary strong { display: block; color: ${C.text}; font-size: 18px; margin-bottom: 4px; }
     .optional-details summary span { display: block; color: ${C.muted}; font-size: 14.5px; line-height: 1.5; }
-    .optional-summary-meta { flex-shrink: 0; border: 1px solid #fed7aa; background: #ffedd5; color: #9a3412; border-radius: 999px; padding: 6px 10px; font-size: 12px; font-weight: 850; }
+    .optional-summary-meta { flex-shrink: 0; border: 1px solid ${C.accent}66; background: ${C.accent}1f; color: #fed7aa; border-radius: 999px; padding: 6px 10px; font-size: 12px; font-weight: 850; }
     .optional-body { padding: 0 22px 22px; display: flex; flex-direction: column; gap: 16px; border-top: 1px solid ${C.border}; }
     .mini-section { background: ${C.card2}; border: 1px solid ${C.border}; border-radius: 15px; padding: 18px; }
     .mini-section-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 6px; }
     .mini-section h3 { margin: 0; color: ${C.text}; font-size: 18px; font-weight: 900; }
     .mini-section p { margin: 0 0 14px; color: ${C.muted}; font-size: 14.5px; line-height: 1.55; }
-    .mini-count { border: 1px solid ${C.border}; background: #ffffff; color: ${C.muted}; border-radius: 999px; padding: 4px 9px; font-size: 12px; font-weight: 850; }
-    .benefit-card { background: #ffffff; border: 1px solid ${C.border}; border-radius: 13px; padding: 13px; }
+    .mini-count { border: 1px solid ${C.border}; background: ${C.input}; color: ${C.muted}; border-radius: 999px; padding: 4px 9px; font-size: 12px; font-weight: 850; }
+    .benefit-card { background: ${C.input}; border: 1px solid ${C.border}; border-radius: 13px; padding: 13px; }
     @media (max-width: 720px) {
       .form-grid { grid-template-columns: 1fr; }
       .form-field-full { grid-column: auto; }
-      .form-actions { position: sticky; bottom: 0; margin: 24px -18px -18px; padding: 14px 18px; background: rgba(255,255,255,0.96); border-top: 1px solid ${C.border}; backdrop-filter: blur(12px); }
+      .form-actions { position: sticky; bottom: 0; margin: 24px -18px -18px; padding: 14px 18px; background: rgba(15,16,32,0.96); border-top: 1px solid ${C.border}; backdrop-filter: blur(12px); }
     }
     @media (max-width: 980px) {
       .order-layout { grid-template-columns: 1fr; max-width: 860px; margin: 0 auto; }
@@ -1415,9 +1415,9 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
   `;
 
   return (
-    <div style={{ background: `linear-gradient(180deg, #ffffff 0, ${C.bg} 260px)`, minHeight: "100vh", color: C.text, fontFamily: "-apple-system,'Segoe UI',sans-serif", paddingBottom: 60 }}>
+    <div style={{ background: `radial-gradient(circle at 50% -120px, ${C.accent}1f, transparent 360px), ${C.bg}`, minHeight: "100vh", color: C.text, fontFamily: "-apple-system,'Segoe UI',sans-serif", paddingBottom: 60 }}>
       <style>{globalStyles}</style>
-      <div style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(255,255,255,0.92)", backdropFilter: "blur(14px)", borderBottom: `1px solid ${C.border}` }}>
+      <div style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(8,8,16,0.88)", backdropFilter: "blur(14px)", borderBottom: `1px solid ${C.border}` }}>
         <div style={{ maxWidth: 1180, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px", gap: 16 }}>
           <div onClick={() => setStarted(false)} style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-0.5px", cursor: "pointer" }}>
             webodai<span style={{ color: C.accent }}>.cz</span>
@@ -1432,7 +1432,7 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
 
       <div style={{ maxWidth: 1180, margin: "0 auto", padding: "28px 24px 0" }}>
         <div style={{ marginBottom: 24 }}>
-          <div style={{ color: "#9a3412", background: "#ffedd5", border: "1px solid #fed7aa", borderRadius: 999, padding: "6px 11px", display: "inline-flex", fontSize: 13, fontWeight: 850, marginBottom: 12 }}>
+          <div style={{ color: "#fed7aa", background: C.accent + "1f", border: `1px solid ${C.accent}66`, borderRadius: 999, padding: "6px 11px", display: "inline-flex", fontSize: 13, fontWeight: 850, marginBottom: 12 }}>
             Bez registrace · výstup je HTML soubor
           </div>
           <h1 style={{ margin: "0 0 8px", fontSize: 38, lineHeight: 1.08, letterSpacing: "-0.03em", color: C.text }}>
@@ -1447,7 +1447,7 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
           <aside className="order-sidebar">
             <div style={{ color: C.text, fontWeight: 900, fontSize: 18, marginBottom: 4 }}>Postup objednávky</div>
             <div style={{ color: C.muted, fontSize: 14, lineHeight: 1.45, marginBottom: 12 }}>Krok {step + 1} z {STEPS.length}</div>
-            <div style={{ height: 8, background: "#e7ecf5", borderRadius: 999, overflow: "hidden", marginBottom: 14 }}>
+            <div style={{ height: 8, background: C.input, border: `1px solid ${C.border}`, borderRadius: 999, overflow: "hidden", marginBottom: 14 }}>
               <div style={{ width: `${((step + 1) / STEPS.length) * 100}%`, height: "100%", background: C.accent, borderRadius: 999 }} />
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -1467,7 +1467,7 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
           </aside>
 
           <main>
-            <div style={{ background: C.card, border: `1.5px solid ${C.border}`, borderRadius: 24, padding: "32px", boxShadow: "0 24px 70px rgba(17,24,39,0.08)" }}>
+            <div style={{ background: `linear-gradient(180deg, ${C.card2}, ${C.card})`, border: `1.5px solid ${C.border}`, borderRadius: 24, padding: "32px", boxShadow: "0 30px 100px rgba(0,0,0,0.32)" }}>
               {step === 0 && <StepFirma   f={f} upd={upd} />}
               {step === 1 && <StepSluzby  f={f} upd={upd} />}
               {step === 2 && <StepPostup  f={f} upd={upd} />}

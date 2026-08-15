@@ -6,7 +6,7 @@
 - [x] Přidat pojistku po generování: pokud zákazník nezadá slogan, H1 se drží názvu firmy.
 - [x] Přidat spolehlivý lightbox do finálního HTML mimo AI generování.
 - [x] Zvýraznit obrazovku po dokončení generování a přidat jasné další kroky.
-- [x] Předělat objednávkový header, světlý shell formuláře a první krok formuláře.
+- [x] Předělat objednávkový header, tmavý shell formuláře a první krok formuláře.
 - [ ] Připravit 5-7 testovacích zadání podle oborů a porovnat kvalitu výstupů.
 - [ ] Doplnit automatickou kontrolu, že vygenerovaný web neobsahuje nepovolené marketingové fráze mimo zadání.
 - [ ] Rozhodnout, které obory chceme v první prodejní vlně podporovat a které raději zatím nedávat do reklamy.
