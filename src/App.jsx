@@ -102,15 +102,17 @@ function FormSection({ title, desc, required = false, children }) {
 function StepFirma({ f, upd }) {
   const trustFilled = f.trustPoints.filter(s => s.trim()).length;
   const benefitsFilled = f.benefits.filter(b => b.title.trim()).length;
+  const hasOptionalContent = Boolean(f.heroHeadline.trim() || f.founded.trim() || trustFilled || benefitsFilled);
+  const [extrasOpen, setExtrasOpen] = useState(() => hasOptionalContent);
   return (
     <div>
       <div style={{ marginBottom: 22 }}>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "#fed7aa", background: C.accent + "1f", border: `1px solid ${C.accent}66`, borderRadius: 999, padding: "6px 11px", fontSize: 13, fontWeight: 850, marginBottom: 12 }}>
           Krok 1 z {STEPS.length}
         </div>
-        <h2 style={{ margin: "0 0 8px", fontSize: 32, lineHeight: 1.12, fontWeight: 950, color: C.text }}>Nejdřív jen základ firmy</h2>
+        <h2 style={{ margin: "0 0 8px", fontSize: 32, lineHeight: 1.12, fontWeight: 950, color: C.text }}>Základ firmy</h2>
         <p style={{ color: C.muted, fontSize: 17, lineHeight: 1.65, margin: 0, maxWidth: 720 }}>
-          Stačí čtyři povinné údaje. Doplňky níže jsou schované, ať formulář zbytečně nestraší.
+          Vyplňte čtyři povinné údaje. Vlastní slogan, rok založení a další texty můžete otevřít samostatným tlačítkem níže.
         </p>
       </div>
 
@@ -132,18 +134,30 @@ function StepFirma({ f, upd }) {
           </div>
         </FormSection>
 
-        <details className="optional-details">
-          <summary>
-            <div>
-              <strong>Volitelné doplňky pro lepší web</strong>
-              <span>Slogan, rok založení, důvěryhodnost a benefity. Když je necháte prázdné, nic špatného se nestane.</span>
+        <div className="optional-panel">
+          <button
+            type="button"
+            className={`optional-trigger ${extrasOpen ? "is-open" : ""}`}
+            aria-expanded={extrasOpen}
+            onClick={() => setExtrasOpen(open => !open)}
+          >
+            <span className="optional-icon">{extrasOpen ? "−" : "+"}</span>
+            <div className="optional-trigger-copy">
+              <strong>Doplnit vlastní texty navíc</strong>
+              <span>Otevřete jen pokud chcete zadat slogan, rok založení, důvěryhodnost nebo benefity.</span>
+              <div className="optional-tags">
+                <span>Vlastní slogan</span>
+                <span>Rok založení</span>
+                <span>Důvěryhodnost</span>
+                <span>Benefity</span>
+              </div>
             </div>
             <div className="optional-summary-meta">
-              {trustFilled + benefitsFilled > 0 || f.heroHeadline || f.founded ? "Něco vyplněno" : "Přeskočit"}
+              {extrasOpen ? "Skrýt" : hasOptionalContent ? "Upravit" : "Otevřít"}
             </div>
-          </summary>
+          </button>
 
-          <div className="optional-body">
+          {extrasOpen && <div className="optional-body">
             <div className="mini-section">
               <div className="mini-section-head">
                 <h3>Úvod webu</h3>
@@ -219,8 +233,8 @@ function StepFirma({ f, upd }) {
                 ))}
               </div>
             </div>
-          </div>
-        </details>
+          </div>}
+        </div>
       </div>
     </div>
   );
@@ -1390,13 +1404,18 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
     .step-row.is-done { color: ${C.text}; cursor: pointer; }
     .step-dot { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; flex-shrink: 0; background: ${C.input}; color: ${C.muted}; border: 1px solid ${C.border}; }
     .step-row.is-current .step-dot, .step-row.is-done .step-dot { background: ${C.accent}; color: white; }
-    .optional-details { background: ${C.card}; border: 1.5px solid ${C.border}; border-radius: 18px; overflow: hidden; box-shadow: 0 16px 50px rgba(0,0,0,0.18); }
-    .optional-details summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; gap: 18px; align-items: center; padding: 20px 22px; }
-    .optional-details summary::-webkit-details-marker { display: none; }
-    .optional-details summary strong { display: block; color: ${C.text}; font-size: 18px; margin-bottom: 4px; }
-    .optional-details summary span { display: block; color: ${C.muted}; font-size: 14.5px; line-height: 1.5; }
+    .optional-panel { background: ${C.card}; border: 1.5px solid ${C.border}; border-radius: 18px; overflow: hidden; box-shadow: 0 16px 50px rgba(0,0,0,0.18); }
+    .optional-trigger { width: 100%; border: 0; background: linear-gradient(135deg, ${C.card2}, ${C.card}); cursor: pointer; display: flex; justify-content: space-between; gap: 18px; align-items: center; padding: 20px 22px; color: inherit; font: inherit; text-align: left; }
+    .optional-trigger:hover { background: linear-gradient(135deg, ${C.accent}18, ${C.card2}); }
+    .optional-trigger.is-open { border-bottom: 1px solid ${C.border}; }
+    .optional-icon { width: 40px; height: 40px; border-radius: 50%; background: ${C.accent}; color: white; display: inline-flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900; flex-shrink: 0; box-shadow: 0 12px 28px ${C.accent}33; }
+    .optional-trigger-copy { flex: 1; min-width: 0; }
+    .optional-trigger-copy strong { display: block; color: ${C.text}; font-size: 19px; margin-bottom: 4px; }
+    .optional-trigger-copy > span { display: block; color: ${C.muted}; font-size: 14.5px; line-height: 1.5; }
+    .optional-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+    .optional-tags span { border: 1px solid ${C.border}; background: ${C.input}; color: ${C.muted}; border-radius: 999px; padding: 4px 8px; font-size: 12px; font-weight: 750; }
     .optional-summary-meta { flex-shrink: 0; border: 1px solid ${C.accent}66; background: ${C.accent}1f; color: #fed7aa; border-radius: 999px; padding: 6px 10px; font-size: 12px; font-weight: 850; }
-    .optional-body { padding: 0 22px 22px; display: flex; flex-direction: column; gap: 16px; border-top: 1px solid ${C.border}; }
+    .optional-body { padding: 22px; display: flex; flex-direction: column; gap: 16px; }
     .mini-section { background: ${C.card2}; border: 1px solid ${C.border}; border-radius: 15px; padding: 18px; }
     .mini-section-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 6px; }
     .mini-section h3 { margin: 0; color: ${C.text}; font-size: 18px; font-weight: 900; }
@@ -1406,6 +1425,9 @@ VRAŤ POUZE HTML KÓD. Začni <!DOCTYPE html>.`;
     @media (max-width: 720px) {
       .form-grid { grid-template-columns: 1fr; }
       .form-field-full { grid-column: auto; }
+      .optional-trigger { align-items: flex-start; padding: 18px; }
+      .optional-icon { width: 34px; height: 34px; font-size: 21px; }
+      .optional-summary-meta { align-self: flex-start; }
       .form-actions { position: sticky; bottom: 0; margin: 24px -18px -18px; padding: 14px 18px; background: rgba(15,16,32,0.96); border-top: 1px solid ${C.border}; backdrop-filter: blur(12px); }
     }
     @media (max-width: 980px) {
